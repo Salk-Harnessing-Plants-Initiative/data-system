@@ -8,16 +8,22 @@ port: process.env.port});
 
 exports.handler = async (event) => {
 
-	pool.query("SELECT * FROM experiment", (err, res) => {
-		console.log(err, res);
-		pool.end();
-	});
+    console.log("HOWDY!");
 
-    // TODO implement
+    try {
+        let result = await pool.query("SELECT * FROM experiment"); 
+        console.log(result.rows);
+    } catch(err) {
+        console.log(err);
+    }
+    pool.end();
+
     const response = {
         statusCode: 200,
         body: JSON.stringify('Hello from Lambda!'),
     };
+
+    console.log("GOODBYE!");
+
     return response;
 };
-
