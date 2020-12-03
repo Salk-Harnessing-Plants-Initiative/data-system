@@ -55,11 +55,8 @@ exports.handler = async (event) => {
     try {
         await pool.query("BEGIN;");
         try {
-            console.log(format("INSERT INTO container (container_id, experiment_id, created_by, container_type) VALUES %L;", container_rows));
             await pool.query(format("INSERT INTO container (container_id, experiment_id, created_by, container_type) VALUES %L;", container_rows));
-            console.log(format("INSERT INTO plant (plant_id, experiment_id, created_by) VALUES %L;", plant_rows));
             await pool.query(format("INSERT INTO plant (plant_id, experiment_id, created_by) VALUES %L;", plant_rows));
-            console.log(format("INSERT INTO containing (container_id, containing_position, plant_id, created_by) VALUES %L;", containing_rows));
             await pool.query(format("INSERT INTO containing (container_id, containing_position, plant_id, created_by) VALUES %L;", containing_rows));
             result = await pool.query("COMMIT;");
         } catch(err) {
