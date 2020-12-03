@@ -39,14 +39,14 @@ exports.handler = async (event) => {
     for (let i = 0; i < num_containers; i++) {
         // Create the container
         const container_id = uuidv4();
-        container_rows.push([container_id, experiment_id, created_by]);
+        container_rows.push([container_id, experiment_id, created_by, container_type]);
 
         for (let containing_position = 0; containing_position < plants_per_container; containing_position++) {
             // Create the plant
             const plant_id = uuidv4();
             plant_rows.push([plant_id, experiment_id, created_by]);
             // Create the containing relationship
-            container_rows.push([container_id, containing_position, plant_id, created_by]);
+            containing_rows.push([container_id, containing_position, plant_id, created_by]);
         }
     }
 
@@ -55,19 +55,22 @@ exports.handler = async (event) => {
     try {
         await pool.query("BEGIN;");
         try {
-            await pool.query(format("INSERT INTO container (container_id, experiment_id, created_by) VALUES %L;", container_rows));
+            console.log(format("INSERT INTO container (container_id, experiment_id, created_by, container_type) VALUES %L;", container_rows));
+            await pool.query(format("INSERT INTO container (container_id, experiment_id, created_by, container_type) VALUES %L;", container_rows));
+            console.log(format("INSERT INTO plant (plant_id, experiment_id, created_by) VALUES %L;", plant_rows));
             await pool.query(format("INSERT INTO plant (plant_id, experiment_id, created_by) VALUES %L;", plant_rows));
+            console.log(format("INSERT INTO containing (container_id, containing_position, plant_id, created_by) VALUES %L;", containing_rows));
             await pool.query(format("INSERT INTO containing (container_id, containing_position, plant_id, created_by) VALUES %L;", containing_rows));
             result = await pool.query("COMMIT;");
         } catch(err) {
             await pool.query("ROLLBACK");
             console.log(err);
-            return {statusCode: 400, body: err.message};
+            return {statusCode: 400, body: err.stack};
         }
         
     } catch(err) {
         console.log(err);
-        return {statusCode: 400, body: err.message};
+        return {statusCode: 400, body: err.stack};
     }
 
     console.log(result);
