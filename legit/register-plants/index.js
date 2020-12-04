@@ -42,15 +42,11 @@ const s3 = new AWS.S3();
 exports.handler = async (event) => {
     let {container_rows, plant_rows, containing_rows} = generate_rows(event);
     try {
-        console.log("A");
         await do_insert(container_rows, plant_rows, containing_rows);
-        console.log("B");
         container_csv_key = await upload(make_csv(["container_id", "experiment_id", "created_by", "container_type"],
             container_rows, event.experiment_id, event.container_type));
-        console.log("C");
         plant_csv_key = await upload(make_csv(["plant_id", "experiment_id", "created_by"],
-            plant_rows, event.experiment_id, "plants"));
-        console.log("D");
+            plant_rows, event.experiment_id, "plant"));
     } catch (err) {
         console.log(err);
         return {statusCode: 400, body: err.stack};
@@ -109,24 +105,11 @@ function make_csv (header_row, rows, experiment_id, topic) {
     rows.unshift(header_row);
     const data = stringify(rows);
     const path = `/tmp/${experiment_id}-${topic}-${moment().format("YYYY-MM-DD-HHMMSS")}.csv`;
-    console.log("ALPHA: " + path);
     fs.writeFileSync(path, data, 'utf8');
     return path;
 }
 
 async function upload (path) {
-
-    // TODO: REMOVE
-    fs.createReadStream(path)
-        .pipe(csv())
-        .on('data', (row) => {
-        console.log(row);
-        })
-        .on('end', () => {
-        console.log('CSV file successfully processed');
-        });
-
-
     const fileContent = fs.readFileSync(path);
     const key = node_path.basename(path);
     try {
@@ -143,7 +126,7 @@ async function upload (path) {
         });
         console.log(result); 
 
-        TODO: clean the code below
+        TODO: clean the code below because doesn't need to be in a try nest
         */
         //executes the upload and waits for it to finish
         await s3.upload(params).promise().then(function(data) {
