@@ -3,3 +3,4 @@ node_modules
 out
 lambdaFunc.zip
 function.zip
+lambda-s3/function.zip
