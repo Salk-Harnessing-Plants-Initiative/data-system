@@ -1,7 +1,14 @@
-// dependencies
+// https://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html
+// http://thecodebarbarian.com/creating-qr-codes-with-node-js.html
+
+// dependencies - aws
 const AWS = require('aws-sdk');
 const util = require('util');
 const sharp = require('sharp');
+
+// qr
+const QRReader = require('qrcode-reader');
+const jimp = require('jimp');
 
 // get reference to S3 client
 const s3 = new AWS.S3();
@@ -56,6 +63,20 @@ exports.handler = async (event, context, callback) => {
         return;
     } 
 
+    // Read the QR code and log it
+    try {
+        const img = await jimp.read(buffer);
+        const qr = new QRReader();
+        // qrcode-reader's API doesn't support promises, so wrap it
+        const value = await new Promise((resolve, reject) => {
+            qr.callback = (err, v) => err != null ? reject(err) : resolve(v);
+            qr.decode(img.bitmap);
+        });
+        console.log(value.result);
+    } catch (error) {
+        console.log(error);
+    }
+    
     // Upload the thumbnail image to the destination bucket
     try {
         const destparams = {
