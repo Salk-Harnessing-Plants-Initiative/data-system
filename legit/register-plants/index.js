@@ -14,6 +14,16 @@ Usage: event should have the following
 }
 */
 
+
+//TEMOPORARY TODO REMOVE
+const csv = require('csv-parser');
+
+// For CSVs
+const moment = require('moment')
+const stringify = require('csv-stringify/lib/sync');
+const fs = require('fs');
+const node_path = require('path');
+// For Postgres
 const {v4 : uuidv4} = require('uuid');
 const pg = require("pg");
 const format = require('pg-format');
@@ -24,8 +34,51 @@ const pool = new pg.Pool({
     password: process.env.password,
     port: process.env.port
 });
+// For AWS S3
+const bucket = process.env.bucket;
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
 
 exports.handler = async (event) => {
+    let {container_rows, plant_rows, containing_rows} = generate_rows(event);
+    try {
+        console.log("A");
+        await do_insert(container_rows, plant_rows, containing_rows);
+        console.log("B");
+        container_csv_key = await upload(make_csv(["container_id", "experiment_id", "created_by", "container_type"],
+            container_rows, event.experiment_id, event.container_type));
+        console.log("C");
+        plant_csv_key = await upload(make_csv(["plant_id", "experiment_id", "created_by"],
+            plant_rows, event.experiment_id, "plants"));
+        console.log("D");
+    } catch (err) {
+        console.log(err);
+        return {statusCode: 400, body: err.stack};
+    }
+    return {statusCode: 200, container_csv_key: container_csv_key, plant_csv_key: plant_csv_key};
+}
+
+async function do_insert(container_rows, plant_rows, containing_rows) {
+    let queryResult;
+    try {
+        await pool.query("BEGIN;");
+        try {
+            await pool.query(format("INSERT INTO container (container_id, experiment_id, created_by, container_type) VALUES %L;", container_rows));
+            await pool.query(format("INSERT INTO plant (plant_id, experiment_id, created_by) VALUES %L;", plant_rows));
+            await pool.query(format("INSERT INTO containing (container_id, containing_position, plant_id, created_by) VALUES %L;", containing_rows));
+            queryResult = await pool.query("COMMIT;");
+        } catch(err) {
+            await pool.query("ROLLBACK");
+            throw err;
+        }
+    } catch(err) {
+        throw err;
+    }
+
+    console.log(queryResult);
+}
+
+function generate_rows (event) {
     const experiment_id = event.experiment_id;
     const container_type = event.container_type; 
     const num_containers = parseInt(event.num_containers, 10);
@@ -49,28 +102,60 @@ exports.handler = async (event) => {
             containing_rows.push([container_id, containing_position, plant_id, created_by]);
         }
     }
-
-    // Query
-    let result;
-    try {
-        await pool.query("BEGIN;");
-        try {
-            await pool.query(format("INSERT INTO container (container_id, experiment_id, created_by, container_type) VALUES %L;", container_rows));
-            await pool.query(format("INSERT INTO plant (plant_id, experiment_id, created_by) VALUES %L;", plant_rows));
-            await pool.query(format("INSERT INTO containing (container_id, containing_position, plant_id, created_by) VALUES %L;", containing_rows));
-            result = await pool.query("COMMIT;");
-        } catch(err) {
-            await pool.query("ROLLBACK");
-            console.log(err);
-            return {statusCode: 400, body: err.stack};
-        }
-        
-    } catch(err) {
-        console.log(err);
-        return {statusCode: 400, body: err.stack};
-    }
-
-    console.log(result);
-    return {statusCode: 200, body: result};
+    return {container_rows, plant_rows, containing_rows};
 }
 
+function make_csv (header_row, rows, experiment_id, topic) {
+    rows.unshift(header_row);
+    const data = stringify(rows);
+    const path = `/tmp/${experiment_id}-${topic}-${moment().format("YYYY-MM-DD-HHMMSS")}.csv`;
+    console.log("ALPHA: " + path);
+    fs.writeFileSync(path, data, 'utf8');
+    return path;
+}
+
+async function upload (path) {
+
+    // TODO: REMOVE
+    fs.createReadStream(path)
+        .pipe(csv())
+        .on('data', (row) => {
+        console.log(row);
+        })
+        .on('end', () => {
+        console.log('CSV file successfully processed');
+        });
+
+
+    const fileContent = fs.readFileSync(path);
+    const key = node_path.basename(path);
+    try {
+        const params = {
+            Bucket: bucket,
+            Key: key, // File name you want to save as in S3
+            Body: fileContent,
+            ContentType: 'text/csv'
+        };
+        console.log("HAHAHAHAH" + JSON.stringify(params));
+        /*
+        const result = await s3.putObject(params).promise().catch((error) => {
+            console.log(error);
+        });
+        console.log(result); 
+
+        TODO: clean the code below
+        */
+        //executes the upload and waits for it to finish
+        await s3.upload(params).promise().then(function(data) {
+            console.log(`File uploaded successfully. ${data.Location}`);
+        }, function (err) {
+            console.error("Upload failed", err);
+        });
+
+    } catch (err) {
+        throw err;
+    } 
+    return key;
+}
+
+// TODO: There's no ROLLBACK if the csv stuff fails. Hmmm
