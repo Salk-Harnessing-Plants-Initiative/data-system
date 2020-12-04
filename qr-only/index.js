@@ -1,3 +1,4 @@
+// http://thecodebarbarian.com/creating-qr-codes-with-node-js.html
 const QRReader = require('qrcode-reader');
 const fs = require('fs');
 const jimp = require('jimp');
