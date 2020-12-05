@@ -95,7 +95,8 @@ function generate_rows (event) {
         container_rows.push([container_id, experiment_id, created_by, container_type]);
         container_csv_rows.push([container_id]);
 
-        for (let containing_position = 0; containing_position < plants_per_container; containing_position++) {
+        // (Notice here that this is 1-indexed because biologists like it that way!!)
+        for (let containing_position = 1; containing_position <= plants_per_container; containing_position++) {
             // Create the plant
             const plant_id = uuidv4();
             plant_rows.push([plant_id, experiment_id, created_by]);
