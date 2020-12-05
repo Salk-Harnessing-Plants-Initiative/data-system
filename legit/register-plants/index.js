@@ -36,13 +36,16 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
 exports.handler = async (event) => {
-    let {container_rows, plant_rows, containing_rows} = generate_rows(event);
+    let {container_rows, plant_rows, containing_rows, container_csv_rows, plant_csv_rows} = generate_rows(event);
     try {
+        // Insert into Postgres
         await do_insert(container_rows, plant_rows, containing_rows);
-        container_csv_key = await upload(make_csv(["container_id", "experiment_id", "created_by", "container_type"],
-            container_rows, event.experiment_id, event.container_type));
-        plant_csv_key = await upload(make_csv(["plant_id", "experiment_id", "created_by"],
-            plant_rows, event.experiment_id, "plant"));
+        // Upload container csv for user to S3
+        container_csv_key = await upload(make_csv(
+            ["container_id"], container_csv_rows, event.experiment_id, event.container_type));
+        // Upload plant csv for user to S3
+        plant_csv_key = await upload(make_csv(
+            ["plant_id", "container_id", "containing_position"], plant_csv_rows, event.experiment_id, "plant"));
     } catch (err) {
         console.log(err);
         return {statusCode: 400, body: err.stack};
@@ -77,30 +80,37 @@ function generate_rows (event) {
     const plants_per_container = parseInt(event.plants_per_container, 10);
     const created_by = event.created_by;
 
-    // Generate containers, plants, and containing relationships
+    // For database entry
     let container_rows = [];
     let plant_rows = [];
     let containing_rows = [];
+    // For CSVs for the client
+    let container_csv_rows = [];
+    let plant_csv_rows = [];
+
+    // Generate containers, plants, and containing relationships
     for (let i = 0; i < num_containers; i++) {
         // Create the container
         const container_id = uuidv4();
         container_rows.push([container_id, experiment_id, created_by, container_type]);
+        container_csv_rows.push([container_id]);
 
         for (let containing_position = 0; containing_position < plants_per_container; containing_position++) {
             // Create the plant
             const plant_id = uuidv4();
             plant_rows.push([plant_id, experiment_id, created_by]);
+            plant_csv_rows.push([plant_id, container_id, containing_position]);
             // Create the containing relationship
             containing_rows.push([container_id, containing_position, plant_id, created_by]);
         }
     }
-    return {container_rows, plant_rows, containing_rows};
+    return {container_rows, plant_rows, containing_rows, container_csv_rows, plant_csv_rows};
 }
 
 function make_csv (header_row, rows, experiment_id, topic) {
     rows.unshift(header_row);
     const data = stringify(rows);
-    const path = `/tmp/${experiment_id}-${topic}-${moment().format("YYYY-MM-DD-HHMMSS")}.csv`;
+    const path = `/tmp/${experiment_id}-new-${topic}-${moment().format("YYYY-MM-DD-HHMMSS")}.csv`;
     fs.writeFileSync(path, data, 'utf8');
     return path;
 }
