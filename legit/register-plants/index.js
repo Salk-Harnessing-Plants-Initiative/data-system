@@ -14,10 +14,6 @@ Usage: event should have the following
 }
 */
 
-
-//TEMOPORARY TODO REMOVE
-const csv = require('csv-parser');
-
 // For CSVs
 const moment = require('moment')
 const stringify = require('csv-stringify/lib/sync');
@@ -119,7 +115,6 @@ async function upload (path) {
             Body: fileContent,
             ContentType: 'text/csv'
         };
-        console.log("HAHAHAHAH" + JSON.stringify(params));
         /*
         const result = await s3.putObject(params).promise().catch((error) => {
             console.log(error);
