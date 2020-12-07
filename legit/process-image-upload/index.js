@@ -92,17 +92,17 @@ exports.handler = async (event, context, callback) => {
         console.log(error);
     }
 
-    // Use the Sharp module to resize the image and save in a buffer.
+    // Use the Sharp module to resize the image and save in a buffer as png.
     // Resize will set the height automatically to maintain aspect ratio.
     let thumbnail_buffer;
     try { 
-        thumbnail_buffer = await sharp(origimage.Body).resize(width).toBuffer();
+        thumbnail_buffer = await sharp(origimage.Body).resize(width).toFormat('png').toBuffer();
     } catch (error) {
         console.log(error);
     } 
     // Upload the thumbnail image to the destination bucket
     const dstBucket = srcBucket;
-    const dstKey = `thumbnail/${width.toString()}px/${user_input_filename}`;
+    const dstKey = `thumbnail/${width.toString()}px/${user_input_filename}`.replace(/\.[^/.]+$/, "") + ".png";
     try {
         const destparams = {
             Bucket: dstBucket,
