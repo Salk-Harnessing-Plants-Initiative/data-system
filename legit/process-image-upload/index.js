@@ -115,6 +115,7 @@ exports.handler = async (event, context, callback) => {
     } 
 
     // Insert into table
+    // TODO: Ternary operators totally required here if you want to proceed even if a step fails
     try {
     	await pool.query(`INSERT INTO image (raw, thumbnail, container_id, user_input_filename) VALUES (${srcKey}, ${dstKey}, ${qr_value}, ${user_input_filename})`);
     } catch (error) {
