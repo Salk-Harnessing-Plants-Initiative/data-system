@@ -122,7 +122,7 @@ exports.handler = async (event, context, callback) => {
     	return;
     }
         
-    console.log(`Done for ${srcBucket}/${srcKey}. Success QR = ${success_qr}, success thumbial = ${success_thumbnail}`);
+    console.log(`Done for ${srcBucket}/${srcKey}. Success QR = ${success_qr}, success thumbnail = ${success_thumbnail}`);
 
 };
 
