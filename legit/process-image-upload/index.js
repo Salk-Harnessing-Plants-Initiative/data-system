@@ -37,7 +37,7 @@ const pool = new pg.Pool({
     port: process.env.port
 });
 // Set thumbnail width
-const width  = process.env.width;
+const width  = parseInt(process.env.width, 10);
 
 exports.handler = async (event, context, callback) => {
     const srcBucket = event.Records[0].s3.bucket.name;
