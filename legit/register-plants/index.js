@@ -4,6 +4,11 @@ AWS Lambda for registering plants
 Russell Tran
 3 December 2020
 
+Generates new uuids for containers and plants.
+Registers said uuids, creates CSVs for the user to create barcodes
+and associate data with their plant. Returns the S3 keys for the
+CSVs.
+
 Usage: event should have the following
 {
     experiment_id : string
