@@ -87,14 +87,16 @@ exports.handler = async (event, context, callback) => {
             qr.decode(img.bitmap);
         });
         qr_value = value.result;
+        success_qr = true;
     } catch (error) {
         console.log(error);
     }
 
     // Use the Sharp module to resize the image and save in a buffer.
     // Resize will set the height automatically to maintain aspect ratio.
+    let thumbnail_buffer;
     try { 
-        let thumbnail_buffer = await sharp(origimage.Body).resize(width).toBuffer();
+        thumbnail_buffer = await sharp(origimage.Body).resize(width).toBuffer();
     } catch (error) {
         console.log(error);
     } 
@@ -109,7 +111,7 @@ exports.handler = async (event, context, callback) => {
             ContentType: "image"
         };
         const putResult = await s3.putObject(destparams).promise(); 
-
+        success_thumbnail = true;
     } catch (error) {
         console.log(error);
     } 
@@ -117,7 +119,9 @@ exports.handler = async (event, context, callback) => {
     // Insert into table
     // TODO: Ternary operators totally required here if you want to proceed even if a step fails
     try {
-    	await pool.query(`INSERT INTO image (raw, thumbnail, container_id, user_input_filename) VALUES (${srcKey}, ${dstKey}, ${qr_value}, ${user_input_filename})`);
+    	const q = `INSERT INTO image (raw, thumbnail, container_id, user_input_filename) VALUES ('${srcKey}', '${dstKey}', '${qr_value}', '${user_input_filename}')`;
+    	console.log(q);
+    	await pool.query(q);
     } catch (error) {
     	console.log(error);
     	return;
