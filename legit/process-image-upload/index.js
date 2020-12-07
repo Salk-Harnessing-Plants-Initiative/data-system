@@ -134,3 +134,4 @@ exports.handler = async (event, context, callback) => {
 // TODO: What happens if multiple QR codes are detected?
 // TODO: Should abort if any step fails?
 // TODO: Thumbnail needs to be converted to .png type always (right now it's just hanging out as .tif)
+// TODO: EXIF https://sharp.pixelplumbing.com/api-input
