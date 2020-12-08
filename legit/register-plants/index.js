@@ -68,7 +68,7 @@ async function do_insert(container_rows, plant_rows, containing_rows) {
             await pool.query(format("INSERT INTO containing (container_id, containing_position, plant_id, created_by) VALUES %L;", containing_rows));
             queryResult = await pool.query("COMMIT;");
         } catch(err) {
-            await pool.query("ROLLBACK");
+            await pool.query("ROLLBACK;");
             throw err;
         }
     } catch(err) {
