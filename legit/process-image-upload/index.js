@@ -6,7 +6,7 @@ December 2020
 
 Intended to be triggered by S3 uploads to salk-hpi/images/raw or equivalent (* /raw)
 Attempts to decipher a QR code in the image as the container_id for the image
-Creates a 1000-pixel width png thumbnail at salk-hpi/images/thumbnail/1000px (* /thumnbail/1000px)
+Creates a 1000-pixel width png thumbnail at salk-hpi/images/thumbnail/1000px or equivalent (* /thumbail/1000px)
 If the raw image is less than 1000-pixels in width, then the original width is used instead
 
 Currently supports .png, .jpg, .tif
@@ -46,6 +46,8 @@ exports.handler = async (event, context, callback) => {
     // https://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html
     const srcKey = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
     const user_input_filename = node_path.basename(srcKey);
+    // Get the directory path for all the directories prior to "/raw" in "*/raw/srcKey", so basically "*"
+    const src_directories = node_path.dirname(node_path.dirname(srcKey));
 
     // Infer the image type from the file suffix.
     const typeMatch = srcKey.match(/\.([^.]*)$/);
@@ -102,7 +104,7 @@ exports.handler = async (event, context, callback) => {
     } 
     // Upload the thumbnail image to the destination bucket
     const dstBucket = srcBucket;
-    const dstKey = `thumbnail/${width.toString()}px/${user_input_filename}`.replace(/\.[^/.]+$/, "") + ".png";
+    const dstKey = src_directories + `/thumbnail/${width.toString()}px/${user_input_filename}`.replace(/\.[^/.]+$/, "") + ".png";
     try {
         const destparams = {
             Bucket: dstBucket,
