@@ -20,5 +20,20 @@ of catastrophe is low.
 
 // TODO: EVERYTHING
 
-// As of Decembr 2020, Wolfgang's BRAT scanning system puts the timestamp
+// As of December 2020, Wolfgang's BRAT scanning system puts the timestamp
 // in the format YYYYMMDD-HHMMSS somewhere in the filename
+
+const exiftool = require("exiftool-vendored").exiftool
+
+async function parse_timestamp_from_exif(file_path) {
+
+	try {
+		const tags = await exiftool.read(file_path);
+		// These fields are basically the same
+		return tags.DateTimeOriginal.rawValue ? tags.DateTimeOriginal.rawValue : tags.CreateDate.rawValue
+	} catch (error) {
+		throw error;
+	}
+}
+
+parse_timestamp_from_exif("/Users/russelltran/Desktop/Panasonic_DMC-FZ30.jpg").then(data => console.log(data)).catch(error => console.log(error));
