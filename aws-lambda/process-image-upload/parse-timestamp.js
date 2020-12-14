@@ -14,7 +14,7 @@ timestamp parsed is beginning of the time epoch (invalid):
 - Parse timestamp out of EXIF metadata of .jpg and .tif files
 - Parse timestamp out of file name (explicitly ONLY YYYYMMDD-HHMMSS as substring of filename)
 - Parse timestamp out of S3 metadata that we put in there using one of our custom uploader clients
-	("file_created_on_client_filesystem")
+	("file_created")
 
 That we have these heuristics at all is a bit dangerous, but hopefully the probability
 of catastrophe is low.
