@@ -137,5 +137,9 @@ exports.handler = async (event, context, callback) => {
 // TODO: Should abort if any step fails?
 // TODO: Refactor the fact that sharp ingests the image twice
 // TODO: parse timestamp
-// TODO: Think about user_input_filename
+// TODO: Think about user_input_filename: S3 retool upload needs custom keying. Right now this field Doesn't make sense because of script.py ORRR get rid of it for script.py and then put the transformation here
+// Basically, fix the theoretical possibility that two people upload a file with the same name and it causes problems unless you uniquify on the client side
+// Solution: On retool, overload the file name with a uuid and then include the original filename in the metadata possibly 
+// Problem is that s3 retool doesn't have a space for metadata
 // TODO: Different bucket to prevent risk
+// Save the file size in the DB for fun?
