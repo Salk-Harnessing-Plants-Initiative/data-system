@@ -6,7 +6,7 @@ December 2020
 
 Intended to be triggered by S3 uploads to salk-hpi/images/raw or equivalent (* /raw)
 Attempts to decipher a QR code in the image as the container_id for the image
-Creates a 1000-pixel width png thumbnail at salk-hpi/images/thumbnail/1000px or equivalent (* /thumbail/1000px)
+Creates a 1000-pixel width jpg thumbnail at salk-hpi/images/thumbnail/1000px or equivalent (* /thumbail/1000px)
 If the raw image is less than 1000-pixels in width, then the original width is used instead
 
 Currently supports .png, .jpg, .tif
@@ -94,17 +94,17 @@ exports.handler = async (event, context, callback) => {
         console.log(error);
     }
 
-    // Use the Sharp module to resize the image and save in a buffer as png.
+    // Use the Sharp module to resize the image and save in a buffer as jpg.
     // Resize will set the height automatically to maintain aspect ratio.
     let thumbnail_buffer;
     try { 
-        thumbnail_buffer = await sharp(origimage.Body).resize(width).toFormat('png').toBuffer();
+        thumbnail_buffer = await sharp(origimage.Body).resize(width).jpeg({quality: 100, chromaSubsampling: '4:4:4', force: true}).toBuffer();
     } catch (error) {
         console.log(error);
     } 
     // Upload the thumbnail image to the destination bucket
     const dstBucket = srcBucket;
-    const dstKey = src_directories + `/thumbnail/${width.toString()}px/${user_input_filename}`.replace(/\.[^/.]+$/, "") + ".png";
+    const dstKey = src_directories + `/thumbnail/${width.toString()}px/${user_input_filename}`.replace(/\.[^/.]+$/, "") + ".jpg";
     try {
         const destparams = {
             Bucket: dstBucket,
@@ -135,7 +135,7 @@ exports.handler = async (event, context, callback) => {
 
 // TODO: What happens if multiple QR codes are detected?
 // TODO: Should abort if any step fails?
-// TODO: Thumbnail needs to be converted to .png type always (right now it's just hanging out as .tif)
-// TODO: EXIF https://sharp.pixelplumbing.com/api-input
 // TODO: Refactor the fact that sharp ingests the image twice
 // TODO: parse timestamp
+// TODO: Think about user_input_filename
+// TODO: Different bucket to prevent risk
