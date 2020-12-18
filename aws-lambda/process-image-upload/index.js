@@ -26,7 +26,6 @@ const sharp = require('sharp');
 const QRReader = require('qrcode-reader');
 const jimp = require('jimp');
 // For Postgres
-const {v4 : uuidv4} = require('uuid');
 const pg = require("pg");
 const format = require('pg-format');
 const pool = new pg.Pool({
