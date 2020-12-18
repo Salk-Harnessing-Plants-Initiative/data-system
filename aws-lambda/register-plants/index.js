@@ -2,7 +2,7 @@
 Salk Harnessing Plants Initiative
 AWS Lambda for registering plants
 Russell Tran
-3 December 2020
+December 2020
 
 Generates new uuids for containers and plants.
 Registers said uuids, creates CSVs for the user to create barcodes
@@ -18,7 +18,7 @@ Usage: event should have the following
     created_by : the user id (optional)
 }
 
-Note: We use nanoid instead of the usuall uuid v4. This is to keep
+Note: We use nanoid instead of the usual uuid v4. This is to keep
 the QR codes smaller.
 */
 
