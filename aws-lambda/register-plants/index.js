@@ -17,6 +17,9 @@ Usage: event should have the following
     plants_per_container : can be a number or a number as a string
     created_by : the user id (optional)
 }
+
+Note: We use nanoid instead of the usuall uuid v4. This is to keep
+the QR codes smaller.
 */
 
 // For CSVs
@@ -25,7 +28,7 @@ const stringify = require('csv-stringify/lib/sync');
 const fs = require('fs');
 const node_path = require('path');
 // For Postgres
-const {v4 : uuidv4} = require('uuid');
+const { nanoid } = require("nanoid");
 const pg = require("pg");
 const format = require('pg-format');
 const pool = new pg.Pool({
@@ -96,14 +99,14 @@ function generate_rows (event) {
     // Generate containers, plants, and containing relationships
     for (let i = 0; i < num_containers; i++) {
         // Create the container
-        const container_id = uuidv4();
+        const container_id = nanoid();
         container_rows.push([container_id, experiment_id, created_by, container_type]);
         container_csv_rows.push([container_id]);
 
         // (Notice here that this is 1-indexed because biologists like it that way!!)
         for (let containing_position = 1; containing_position <= plants_per_container; containing_position++) {
             // Create the plant
-            const plant_id = uuidv4();
+            const plant_id = nanoid();
             plant_rows.push([plant_id, experiment_id, created_by]);
             plant_csv_rows.push([plant_id, container_id, containing_position]);
             // Create the containing relationship
