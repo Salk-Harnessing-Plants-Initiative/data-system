@@ -10,10 +10,10 @@ so we have to parse it out of there. As of December 2020, Wolfgang's BRAT
 scanning system puts the timestamp in the format YYYYMMDD-HHMMSS somewhere in the filename.
 
 Order of priority in resolving timestamp. Try for the next timestamp IF no timestamp found OR
-timestamp parsed is beginning of the time epoch (invalid):
-- Parse timestamp out of EXIF metadata of .jpg and .tif files
-- Parse timestamp out of file name (explicitly ONLY YYYYMMDD-HHMMSS as substring of filename)
-- Parse timestamp out of S3 metadata that we put in there using one of our custom uploader clients
+timestamp parsed is beginning of the time epoch (edge case for invalid):
+1) Parse timestamp out of EXIF metadata of .jpg and .tif files
+2) Parse timestamp out of file name (explicitly ONLY YYYYMMDD-HHMMSS as substring of filename)
+3) Parse timestamp out of S3 metadata that we put in there using one of our custom uploader clients
 	("file_created")
 
 That we have these heuristics at all is a bit dangerous, but hopefully the probability
@@ -22,6 +22,7 @@ of catastrophe is low.
 
 // TODO: EVERYTHING
 // TODO - Get upset if can't find a timestamp
+// TODO - reinstall exiftool 
 
 const exiftool = require("exiftool-vendored").exiftool
 
