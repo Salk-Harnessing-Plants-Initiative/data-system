@@ -1,5 +1,7 @@
 # Why this code was put into the graveyard
-The current Nodejs modules out there for decoding QR codes are weak and don't even work for our 131 MB .tif plate scans. Namely, `qrcode-reader` and `jsqr` had much poorer performance than `zbar`, a binary library that has been [benchmarked](https://boofcv.org/index.php?title=Performance:QrCode) as pretty robust and is exposed to a Python API but doesn't have a good Nodejs one yet. Also, `sharp`'s ability to parse exif metadata was flaky. 
+* The current Nodejs modules out there for decoding QR codes are weak and don't even work for our 131 MB .tif plate scans. Namely, `qrcode-reader` and `jsqr` had much poorer performance than `zbar`, a binary library that has been [benchmarked](https://boofcv.org/index.php?title=Performance:QrCode) as pretty robust and is exposed to a Python API but doesn't have a good Nodejs one yet. 
+* Also, `sharp`'s ability to parse exif metadata was flaky. 
+* Photo processing depending on too many libraries and so the Lambda was getting bloated and more annoying to upload
 
 # Deployment
 You should note that the node module `sharp` is OS-platform dependent. Thus,
