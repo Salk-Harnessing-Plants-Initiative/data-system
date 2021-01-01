@@ -10,7 +10,7 @@ RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.n
 # Install zbar shared library
 RUN yum install -y zbar
 
-# Install python packages, including pyzbar
+# Install python packages, including pyzbar (Python API to zbar)
 RUN pip install -r requirements.txt
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
