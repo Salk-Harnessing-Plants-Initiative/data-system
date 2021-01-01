@@ -1,3 +1,4 @@
+# See example at (https://gallery.ecr.aws/lambda/python)
 FROM public.ecr.aws/lambda/python:3.8
 
 # Copy function code
