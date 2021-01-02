@@ -36,7 +36,7 @@ exports.handler = async (event) => {
             ["container_id"], container_csv_rows, event.experiment_id, event.container_type));
         // Upload plant csv for user to S3
         plant_csv_key = await upload(make_csv(
-            ["plant_id", "container_id", "containing_position"], plant_csv_rows, event.experiment_id, "plant"));
+            ["plant_id", "container_id", "containing_position", "line_accession", "local_id"], plant_csv_rows, event.experiment_id, "plant"));
     } catch (err) {
         console.log(err);
         return {statusCode: 400, body: err.stack};
