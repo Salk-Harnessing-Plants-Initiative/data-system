@@ -28,6 +28,6 @@ aws lambda update-function-code --function-name register-plants --zip-file \abso
 # Nanoid
 We use nanoid instead of the usual uuid v4. This is to keep the QR codes smaller.
 
-The `plant_id`s are 17-char, which is the default for nanoid and theoretical equivalent to uuids. The `container_id`s are 14-char, and that's because we are trying to optimize within the constraints of printing QR codes on tiny labels, and also the finicky behavior of the BradyID Workstation software (barcode printer label design software). The smallest QR Brady can generate can hold up to 7 chars, and then the capacity for the next QR size is 14. We'll get a smaller (safer) QR code with 14 instead of 17. 
+The `plant_id`s are 21-char, which is the default for nanoid and theoretical equivalent to uuids. The `container_id`s are 14-char, and that's because we are trying to optimize within the constraints of printing QR codes on tiny labels, and also the finicky behavior of the BradyID Workstation software (barcode printer label design software). The smallest QR Brady can generate can hold up to 7 chars, and then the capacity for the next QR size is 14. We'll get a smaller (safer) QR code with 14 instead of 21. 
 
 If you're curious, 14 is still within theoretical safety: https://zelark.github.io/nano-id-cc/

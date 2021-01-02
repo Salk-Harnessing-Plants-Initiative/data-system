@@ -82,7 +82,7 @@ function generate_rows (event) {
     // Generate containers, plants, and containing relationships
     for (let i = 0; i < num_containers; i++) {
         // Create the container
-        // Notice here that the nanoid is 14 characters instead of the usual 17.
+        // Notice here that the nanoid is 14 characters instead of the usual 21.
         const container_id = nanoid(14);
         container_rows.push([container_id, experiment_id, created_by, container_type]);
         container_csv_rows.push([container_id]);
