@@ -35,6 +35,7 @@ exports.handler = async (event) => {
         container_csv_key = await upload(make_csv(
             ["container_id"], container_csv_rows, event.experiment_id, event.container_type));
         // Upload plant csv for user to S3
+        // line_accession and local_id are headers for blank columns for user to fill in later
         plant_csv_key = await upload(make_csv(
             ["plant_id", "container_id", "containing_position", "line_accession", "local_id"], plant_csv_rows, event.experiment_id, "plant"));
     } catch (err) {
