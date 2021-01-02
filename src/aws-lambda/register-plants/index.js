@@ -116,8 +116,11 @@ async function upload (path) {
             ContentType: 'text/csv'
         };
         // executes the upload and waits for it to finish
-        const data = await s3.upload(params);
-        console.log(`File uploaded successfully. ${data.Location}`);
+        await s3.upload(params).promise().then(function(data) {
+            console.log(`File uploaded successfully. ${data.Location}`);
+        }, function (err) {
+            console.error("Upload failed", err);
+        });
         
     } catch (err) {
         throw err;
