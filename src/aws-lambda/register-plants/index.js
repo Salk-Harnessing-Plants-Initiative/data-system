@@ -118,21 +118,10 @@ async function upload (path) {
             Body: fileContent,
             ContentType: 'text/csv'
         };
-        /*
-        const result = await s3.putObject(params).promise().catch((error) => {
-            console.log(error);
-        });
-        console.log(result); 
-
-        TODO: clean the code below because doesn't need to be in a try nest
-        */
-        //executes the upload and waits for it to finish
-        await s3.upload(params).promise().then(function(data) {
-            console.log(`File uploaded successfully. ${data.Location}`);
-        }, function (err) {
-            console.error("Upload failed", err);
-        });
-
+        // executes the upload and waits for it to finish
+        const data = await s3.upload(params);
+        console.log(`File uploaded successfully. ${data.Location}`);
+        
     } catch (err) {
         throw err;
     } 
