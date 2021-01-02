@@ -3,23 +3,6 @@ Salk Harnessing Plants Initiative
 AWS Lambda for registering plants
 Russell Tran
 December 2020
-
-Generates new uuids for containers and plants.
-Registers said uuids, creates CSVs for the user to create barcodes
-and associate data with their plant. Returns the S3 keys for the
-CSVs.
-
-Usage: event should have the following
-{
-    experiment_id : string
-    container_type : string (e.g. should be "plate", "cylinder", "pot")
-    num_containers : can be a number or a number as a string
-    plants_per_container : can be a number or a number as a string
-    created_by : the user id (optional)
-}
-
-Note: We use nanoid instead of the usual uuid v4. This is to keep
-the QR codes smaller.
 */
 
 // For CSVs
@@ -100,9 +83,6 @@ function generate_rows (event) {
     for (let i = 0; i < num_containers; i++) {
         // Create the container
         // Notice here that the nanoid is 14 characters instead of the usual 17.
-        // That has to do with some finicky behavior of the BradyID Workstation software
-        // where we'll get a smaller (safer) QR code with 14 instead of 17.
-        // 14 is still within theoretical safety: https://zelark.github.io/nano-id-cc/
         const container_id = nanoid(14);
         container_rows.push([container_id, experiment_id, created_by, container_type]);
         container_csv_rows.push([container_id]);
