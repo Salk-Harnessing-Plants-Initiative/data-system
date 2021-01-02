@@ -27,10 +27,10 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
 exports.handler = async (event) => {
-    let {container_rows, plant_rows, containing_rows, container_csv_rows, plant_csv_rows} = generate_rows(event);
+    let {container_rows, plant_rows, container_csv_rows, plant_csv_rows} = generate_rows(event);
     try {
         // Insert into Postgres
-        await do_insert(container_rows, plant_rows, containing_rows);
+        await do_insert(container_rows, plant_rows);
         // Upload container csv for user to S3
         container_csv_key = await upload(make_csv(
             ["container_id"], container_csv_rows, event.experiment_id, event.container_type));
@@ -45,26 +45,6 @@ exports.handler = async (event) => {
     return {statusCode: 200, container_csv_key: container_csv_key, plant_csv_key: plant_csv_key};
 }
 
-async function do_insert(container_rows, plant_rows, containing_rows) {
-    let queryResult;
-    try {
-        await pool.query("BEGIN;");
-        try {
-            await pool.query(format("INSERT INTO container (container_id, experiment_id, created_by, container_type) VALUES %L;", container_rows));
-            await pool.query(format("INSERT INTO plant (plant_id, experiment_id, created_by) VALUES %L;", plant_rows));
-            await pool.query(format("INSERT INTO containing (container_id, containing_position, plant_id, created_by) VALUES %L;", containing_rows));
-            queryResult = await pool.query("COMMIT;");
-        } catch(err) {
-            await pool.query("ROLLBACK;");
-            throw err;
-        }
-    } catch(err) {
-        throw err;
-    }
-
-    console.log(queryResult);
-}
-
 function generate_rows (event) {
     const experiment_id = event.experiment_id;
     const container_type = event.container_type; 
@@ -75,7 +55,6 @@ function generate_rows (event) {
     // For database entry
     let container_rows = [];
     let plant_rows = [];
-    let containing_rows = [];
     // For CSVs for the client
     let container_csv_rows = [];
     let plant_csv_rows = [];
@@ -92,13 +71,30 @@ function generate_rows (event) {
         for (let containing_position = 1; containing_position <= plants_per_container; containing_position++) {
             // Create the plant
             const plant_id = nanoid();
-            plant_rows.push([plant_id, experiment_id, created_by]);
+            plant_rows.push([plant_id, experiment_id, created_by, container_id, containing_position]);
             plant_csv_rows.push([plant_id, container_id, containing_position]);
-            // Create the containing relationship
-            containing_rows.push([container_id, containing_position, plant_id, created_by]);
         }
     }
-    return {container_rows, plant_rows, containing_rows, container_csv_rows, plant_csv_rows};
+    return {container_rows, plant_rows, container_csv_rows, plant_csv_rows};
+}
+
+async function do_insert(container_rows, plant_rows) {
+    let queryResult;
+    try {
+        await pool.query("BEGIN;");
+        try {
+            await pool.query(format("INSERT INTO container (container_id, experiment_id, created_by, container_type) VALUES %L;", container_rows));
+            await pool.query(format("INSERT INTO plant (plant_id, experiment_id, created_by, container_id, containing_position) VALUES %L;", plant_rows));
+            queryResult = await pool.query("COMMIT;");
+        } catch(err) {
+            await pool.query("ROLLBACK;");
+            throw err;
+        }
+    } catch(err) {
+        throw err;
+    }
+
+    console.log(queryResult);
 }
 
 function make_csv (header_row, rows, experiment_id, topic) {
@@ -129,4 +125,4 @@ async function upload (path) {
     return key;
 }
 
-// TODO: There's no ROLLBACK if the csv stuff fails. Hmmm
+// TODO: There's no ROLLBACK if the csv stuff fails. Hmmm (create csv before postgres)
