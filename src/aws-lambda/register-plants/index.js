@@ -99,7 +99,11 @@ function generate_rows (event) {
     // Generate containers, plants, and containing relationships
     for (let i = 0; i < num_containers; i++) {
         // Create the container
-        const container_id = nanoid();
+        // Notice here that the nanoid is 14 characters instead of the usual 17.
+        // That has to do with some finicky behavior of the BradyID Workstation software
+        // where we'll get a smaller (safer) QR code with 14 instead of 17.
+        // 14 is still within theoretical safety: https://zelark.github.io/nano-id-cc/
+        const container_id = nanoid(14);
         container_rows.push([container_id, experiment_id, created_by, container_type]);
         container_csv_rows.push([container_id]);
 
