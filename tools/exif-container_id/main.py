@@ -1,23 +1,33 @@
-import pyexiv2
 import json
+import os
+from os import path
+from PIL import Image
+EXIF_USERCOMMENT = 37510 # https://www.awaresystems.be/imaging/tiff/tifftags/privateifd/exif/usercomment.html
 
-def write():
-	metadata = pyexiv2.ImageMetadata(filename)
-	metadata.read()
-	container_id = "taco"
-	userdata = {"container_id" : container_id}
-	metadata['Exif.Photo.UserComment'] = json.dumps(userdata)
-	metadata.write()
+def write_exif(src_path, dst_path, json_dict):
+    """Write json (dictionary)
+    """
+    write_exif_string(src_path, dst_path, json.dumps(json_dict))
 
-def read():
-	filename='/tmp/image.jpg'
-	metadata = pyexiv2.ImageMetadata(filename)
-	metadata.read()
-	userdata=json.loads(metadata['Exif.Photo.UserComment'].value)
-	pprint.pprint(userdata)
+def write_exif_string(src_path, dst_path, string):
+    """Write a string
+    """
+    image = Image.open(src_path)
+    image.tag[EXIF_USERCOMMENT] = string
+    image.save(dst_path, tiffinfo=image.tag)
 
-def move(src_path, dir):        
-	dst_path = os.path.join(today_subdir, ntpath.basename(src_path))
+def read_exif(path):
+    """Returns json (dictionary)
+    """
+    return json.loads(read_exif_string(path))
+
+def read_exif_string(path):
+    """Returns a string
+    """
+    image = Image.open(path)
+    return image.tag[EXIF_USERCOMMENT][0]
+
+def move(src_path, dst_path):        
     # Avoid collisions
     root_ext = os.path.splitext(dst_path)
     i = 0
@@ -27,33 +37,69 @@ def move(src_path, dir):
     # Finally move file
     shutil.move(src_path, dst_path)
 
+def get_preexisting_files(dir):
+    """Recursively get all filenames in a directory
+    Returns them as a list of paths
+    """
+    print(dir)
+    preexisting = []
+    for root, dirs, files in os.walk(dir):
+        print(root)
+        print(dirs)
+        print(files)
+        # Ignore hidden files
+        files = [f for f in files if not f[0] == '.']
+        for file in files:
+            preexisting.append(os.path.join(root, file))
+    return sorted(preexisting)
+
 def main():
 
-	# Open the file mapping
+    # Open the file mapping
 
-	# Get the list of files
+    # Get the list of files
+    #print(get_preexisting_files("/Volumes/groot-data/russell_tran/exif_pipeline/unprocessed/michel/Arabidopsis\ Plates-Take\'s\ 8/Take\'s\ 8_Round\ 2/10.08.20"))
+    dir = "/Volumes/groot-data/russell_tran/exif_pipeline/unprocessed/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20"
+    files = os.listdir(dir)
+    files = files = [f for f in files if not f[0] == '.']
+    for file in files:
+        path = os.path.join(dir, file)
+        read_exif(path)
+    # Iterate through each file
 
-	# Iterate through each file
+        # Discern photo number by '_' delimiter
+        # .replace("_", ",").replace(".", ",").split(",")
 
-		# Discern photo number by '_' delimiter
+        # See if it fits in the mapping, else error
 
-		# See if it fits in the mapping, else error
+        # Write the container_id according to the mapping
 
-		# Write the container_id according to the mapping
+        # Read to confirm it was written successfully
 
-		# Read to confirm it was written successfully
+        # Move to parallel done directory
 
-		# Move to parallel done directory
+        # Record success for statistics
 
-		# Record success for statistics
+        # Log success
 
-		# Log success
+        # Move to parallel error diretory upon failure
 
-		# Move to parallel error diretory upon failure
+        # Log failure
 
-		# Log failure
+        # Record failure for statistics
 
-		# Record failure for statistics
+if __name__ == "__main__":
+    # main()
+
+    path = "/Users/russelltran/Desktop/russell_bacon_0.tif"
+    #path = "/Users/russelltran/Downloads/Arbitro.tiff"
+
+    data = {
+        "container_id" : "taco"
+    }
+
+    write_exif(path, path, data)
+    print(read_exif_string(path))
 
 
-        "/Volumes/groot-data/russell_tran/exif_pipeline/unprocessed/michel/Arabidopsis\ Plates-Take\'s\ 8/Take\'s\ 8_Round\ 2/10.08.20"
+        
