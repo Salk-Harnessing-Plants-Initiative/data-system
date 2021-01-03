@@ -2,7 +2,9 @@ import json
 import os
 from os import path
 from PIL import Image
-EXIF_USERCOMMENT = 37510 # https://www.awaresystems.be/imaging/tiff/tifftags/privateifd/exif/usercomment.html
+# Use the UserComment field, since manufacturers et al. leave it empty
+# https://www.awaresystems.be/imaging/tiff/tifftags/privateifd/exif/usercomment.html
+EXIF_USERCOMMENT = 37510
 
 def write_exif(src_path, dst_path, json_dict):
     """Write json (dictionary)
@@ -24,16 +26,18 @@ def read_exif(path):
 def read_exif_string(path):
     """Returns a string
     """
-    image = Image.open(path)
-    return image.tag[EXIF_USERCOMMENT][0]
+    with Image.open(path) as image:
+        return image.tag[EXIF_USERCOMMENT][0]
 
 def move(src_path, dst_path):        
-    # Avoid collisions
+    # Avoid collisions if file already exists at dst_path
+    # Format the same way filename collisions are resolved in Google Chrome downloads
     root_ext = os.path.splitext(dst_path)
     i = 0
     while os.path.isfile(dst_path):
+        # Recursively avoid the collision
         i += 1
-        dst_path = root_ext[0] + " ({})".format(i) + root_ext[1]
+    dst_path = root_ext[0] + " ({})".format(i) + root_ext[1]
     # Finally move file
     shutil.move(src_path, dst_path)
 
@@ -53,8 +57,7 @@ def get_preexisting_files(dir):
             preexisting.append(os.path.join(root, file))
     return sorted(preexisting)
 
-def main():
-
+def process(rows):
     # Open the file mapping
 
     # Get the list of files
@@ -88,9 +91,8 @@ def main():
 
         # Record failure for statistics
 
-if __name__ == "__main__":
-    # main()
 
+def main():
     path = "/Users/russelltran/Desktop/russell_bacon_0.tif"
     #path = "/Users/russelltran/Downloads/Arbitro.tiff"
 
@@ -99,7 +101,8 @@ if __name__ == "__main__":
     }
 
     write_exif(path, path, data)
-    print(read_exif_string(path))
+    print(read_exif(path))
 
-
+if __name__ == "__main__":
+    main()
         
