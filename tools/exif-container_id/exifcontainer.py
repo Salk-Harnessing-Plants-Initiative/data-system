@@ -41,7 +41,7 @@ def move(src_path, dst_path):
     while os.path.isfile(dst_path):
         # Recursively avoid the collision
         i += 1
-    dst_path = root_ext[0] + " ({})".format(i) + root_ext[1]
+        dst_path = root_ext[0] + " ({})".format(i) + root_ext[1]
 
     # Finally move file, make directories if needed
     os.makedirs(os.path.dirname(dst_path), exist_ok=True)
