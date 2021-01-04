@@ -1,0 +1,19 @@
+{
+	"mappings" : [
+		{
+			"unprocessed" : "/Volumes/groot-data/russell_tran/exif_pipeline/unprocessed/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20",
+			"error" : "/Volumes/groot-data/russell_tran/exif_pipeline/error/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20",
+			"done" : "/Volumes/groot-data/russell_tran/exif_pipeline/done/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20"
+		},
+		{
+			"unprocessed" : "/Volumes/groot-data/russell_tran/exif_pipeline/unprocessed/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.15.20",
+			"error" : "/Volumes/groot-data/russell_tran/exif_pipeline/error/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20",
+			"done" : "/Volumes/groot-data/russell_tran/exif_pipeline/done/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20"
+		},
+		{
+			"unprocessed" : "/Volumes/groot-data/russell_tran/exif_pipeline/unprocessed/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.19.20",
+			"error" : "/Volumes/groot-data/russell_tran/exif_pipeline/error/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20",
+			"done" : "/Volumes/groot-data/russell_tran/exif_pipeline/done/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20"
+		}
+	]
+}

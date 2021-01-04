@@ -2,6 +2,9 @@ import json
 import os
 from os import path
 from PIL import Image
+import pandas as pd
+import logging
+
 # Use the UserComment field, since manufacturers et al. leave it empty
 # https://www.awaresystems.be/imaging/tiff/tifftags/privateifd/exif/usercomment.html
 EXIF_USERCOMMENT = 37510
@@ -39,6 +42,10 @@ def move(src_path, dst_path):
         i += 1
     dst_path = root_ext[0] + " ({})".format(i) + root_ext[1]
     # Finally move file
+
+    os.makedirs(directoriesindapath, exist_ok=True)
+
+
     shutil.move(src_path, dst_path)
 
 def get_preexisting_files(dir):
@@ -57,21 +64,21 @@ def get_preexisting_files(dir):
             preexisting.append(os.path.join(root, file))
     return sorted(preexisting)
 
-def process(rows):
-    # Open the file mapping
+def process(container_df, directory_map):
+    unprocessed_dir = directory_map["unprocessed"]
+    error_dir = directory_map["error"]
+    done_dir = directory_map["done"]
+    # Get the list of tif images in the "unprocessed" dir
+    files = os.listdir(unprocessed_dir)
+    files = sorted([f for f in files if not f[0] == '.']) # Ignore hidden files
 
-    # Get the list of files
-    #print(get_preexisting_files("/Volumes/groot-data/russell_tran/exif_pipeline/unprocessed/michel/Arabidopsis\ Plates-Take\'s\ 8/Take\'s\ 8_Round\ 2/10.08.20"))
-    dir = "/Volumes/groot-data/russell_tran/exif_pipeline/unprocessed/michel/Arabidopsis Plates-Take's 8/Take's 8_Round 2/10.08.20"
-    files = os.listdir(dir)
-    files = files = [f for f in files if not f[0] == '.']
-    for file in files:
-        path = os.path.join(dir, file)
-        read_exif(path)
     # Iterate through each file
+    for file in files:
+        path = os.path.join(unprocessed_dir, file)
 
         # Discern photo number by '_' delimiter
-        # .replace("_", ",").replace(".", ",").split(",")
+        print(file.replace("_", ",").replace(".", ",").split(","))
+        #photo_number = int(file.replace("_", ",").replace(".", ",").split(","))
 
         # See if it fits in the mapping, else error
 
@@ -90,19 +97,27 @@ def process(rows):
         # Log failure
 
         # Record failure for statistics
+        data = {
+            "container_id" : "taco"
+        }
 
+def run(container_csv, directory_json, output_log=None):
+    log_handlers = [logging.StreamHandler()]
+    if output_log is not None:
+        log_handlers.append(logging.FileHandler(output_log))
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=log_handlers
+    )
 
-def main():
-    path = "/Users/russelltran/Desktop/russell_bacon_0.tif"
-    #path = "/Users/russelltran/Downloads/Arbitro.tiff"
-
-    data = {
-        "container_id" : "taco"
-    }
-
-    write_exif(path, path, data)
-    print(read_exif(path))
+    # Iterate through each directory map under "mappings" in the json
+    with open(directory_json) as json_file:
+        directory_maps = json.load(json_file)["mappings"]
+        container_df = pd.read_csv(container_csv)
+        for directory_map in directory_maps:
+            process(container_df, directory_map)
 
 if __name__ == "__main__":
-    main()
+    print("You should import this instead of run directly")
         
