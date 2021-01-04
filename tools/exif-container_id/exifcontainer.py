@@ -55,7 +55,10 @@ def photo_numbers_unique(dir):
         photo_numbers.append(photo_number)
     return pd.Series(photo_numbers).is_unique
 
-def process(container_df, directory_map):
+def container_id_data(row):
+    return { "container_id" : row["container_id"] }
+
+def process(container_df, directory_map, get_data):
     unprocessed_dir = directory_map["unprocessed"]
     error_dir = directory_map["error"]
     done_dir = directory_map["done"]
@@ -88,7 +91,7 @@ def process(container_df, directory_map):
             row = selection.iloc[0]
 
             # Write the container_id according to the mapping
-            data = { "container_id" : row["container_id"] }
+            data = get_data(row)
             write_exif(path, path, data)
             if read_exif(path) != data:
                 raise Exception("storing custom data in exif failed or was corrupted for {}".format(path))
@@ -130,7 +133,7 @@ def check_mappings(container_df, directory_maps):
         if directory_map["unprocessed"] not in header:
             raise Exception("Unprocessed dir {} in directory maps is not in container_csv")
 
-def run(container_csv, directory_json, output_log=None):
+def run(container_csv, directory_json, get_data, output_log=None):
     log_handlers = [logging.StreamHandler()]
     if output_log is not None:
         log_handlers.append(logging.FileHandler(output_log))
@@ -149,7 +152,7 @@ def run(container_csv, directory_json, output_log=None):
         directory_maps = json.load(json_file)["mappings"]
         check_mappings(container_df, directory_maps)
         for directory_map in directory_maps:
-            process(container_df, directory_map)
+            process(container_df, directory_map, get_data)
 
 if __name__ == "__main__":
     print("You should import this instead of run directly")
