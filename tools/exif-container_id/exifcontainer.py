@@ -93,6 +93,7 @@ def process(container_df, directory_map, get_data):
 
             # Write the container_id according to the mapping
             data = get_data(row)
+            logging.info("Writing exif for {}...".format(file))
             write_exif(path, path, data)
             if read_exif(path) != data:
                 raise Exception("storing custom data in exif failed or was corrupted for {}".format(path))
