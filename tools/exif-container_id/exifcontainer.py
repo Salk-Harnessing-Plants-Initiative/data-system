@@ -64,7 +64,7 @@ def process(container_df, directory_map, get_data):
     done_dir = directory_map["done"]
 
     logging.info("==============================================")
-    logging.info("Processing photos with unprocessed = {}, error = {}, done = {}".format(
+    logging.info("Processing photos with unprocessed = {}\nerror = {}\ndone = {}".format(
         unprocessed_dir, error_dir, done_dir))
     if not photo_numbers_unique(unprocessed_dir):
         logging.error("Photo numbers in directory {} were not unique. Skipping this directory...".format(unprocessed_dir))
@@ -78,6 +78,7 @@ def process(container_df, directory_map, get_data):
     # Iterate through each tif file
     files = os.listdir(unprocessed_dir)
     files = sorted([f for f in files if not f[0] == '.']) # Ignore hidden files
+    logging.info("Got files: " + str(files))
     for file in files:
         path = os.path.join(unprocessed_dir, file)
         try:
