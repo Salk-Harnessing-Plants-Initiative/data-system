@@ -4,6 +4,7 @@ from os import path
 from PIL import Image
 import pandas as pd
 import logging
+import shutil
 
 # Use the UserComment field, since manufacturers et al. leave it empty
 # https://www.awaresystems.be/imaging/tiff/tifftags/privateifd/exif/usercomment.html
@@ -64,17 +65,13 @@ def process(container_df, directory_map, get_data):
     done_dir = directory_map["done"]
 
     logging.info("==============================================")
-    logging.info("Processing photos with unprocessed = {}\nerror = {}\ndone = {}".format(
+    logging.info("Processing photos with:\nunprocessed = {}\nerror = {}\ndone = {}".format(
         unprocessed_dir, error_dir, done_dir))
     if not photo_numbers_unique(unprocessed_dir):
         logging.error("Photo numbers in directory {} were not unique. Skipping this directory...".format(unprocessed_dir))
         return
 
-    # Start the accounting off with empty strings
-    # accounting = pd.Series(["" for i in range(len(container_df[unprocessed_dir]))],
-    #    index=container_df[unprocessed_dir].values)
     accounting = {}
-
     # Iterate through each tif file
     files = os.listdir(unprocessed_dir)
     files = sorted([f for f in files if not f[0] == '.']) # Ignore hidden files
@@ -104,9 +101,9 @@ def process(container_df, directory_map, get_data):
             logging.info("Successfully processed {}".format(path))
 
         except Exception as e:
+            logging.error("Failed to process {} : {}".format(path, str(e)))
             move(path, os.path.join(error_dir, file))
             accounting[file] = "failure"
-            logging.error("Failed to process {} : {}".format(path, str(e)))
 
     result = pd.Series(accounting)
     logging.info("Totals:\n" + str(result.sum()))
@@ -144,6 +141,13 @@ def run(container_csv, directory_json, get_data, output_log=None):
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=log_handlers
     )
+    welcome = (
+        "\n"
+        "==================================================\n"
+        "~~~~~~~~~~Starting run of exifcontainer!~~~~~~~~~~\n"
+        "==================================================\n"
+    )
+    logging.info(welcome)
 
     # Iterate through each directory map under "mappings" in the json
     with open(directory_json) as json_file:
