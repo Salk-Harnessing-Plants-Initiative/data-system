@@ -41,65 +41,94 @@ def move(src_path, dst_path):
         # Recursively avoid the collision
         i += 1
     dst_path = root_ext[0] + " ({})".format(i) + root_ext[1]
-    # Finally move file
 
-    os.makedirs(directoriesindapath, exist_ok=True)
-
-
+    # Finally move file, make directories if needed
+    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
     shutil.move(src_path, dst_path)
 
-def get_preexisting_files(dir):
-    """Recursively get all filenames in a directory
-    Returns them as a list of paths
-    """
-    print(dir)
-    preexisting = []
-    for root, dirs, files in os.walk(dir):
-        print(root)
-        print(dirs)
-        print(files)
-        # Ignore hidden files
-        files = [f for f in files if not f[0] == '.']
-        for file in files:
-            preexisting.append(os.path.join(root, file))
-    return sorted(preexisting)
+def photo_numbers_unique(dir):
+    files = os.listdir(dir)
+    files = sorted([f for f in files if not f[0] == '.']) # Ignore hidden files
+    photo_numbers = []
+    for file in files:
+        photo_number = int(file.replace("_", ",").replace(".", ",").split(",")[-2])
+        photo_numbers.append(photo_number)
+    return pd.Series(photo_numbers).is_unique
 
 def process(container_df, directory_map):
     unprocessed_dir = directory_map["unprocessed"]
     error_dir = directory_map["error"]
     done_dir = directory_map["done"]
-    # Get the list of tif images in the "unprocessed" dir
+
+    logging.info("==============================================")
+    logging.info("Processing photos with unprocessed = {}, error = {}, done = {}".format(
+        unprocessed_dir, error_dir, done_dir))
+    if not photo_numbers_unique(unprocessed_dir):
+        logging.error("Photo numbers in directory {} were not unique. Skipping this directory...".format(unprocessed_dir))
+        return
+
+    # Start the accounting off with empty strings
+    # accounting = pd.Series(["" for i in range(len(container_df[unprocessed_dir]))],
+    #    index=container_df[unprocessed_dir].values)
+    accounting = {}
+
+    # Iterate through each tif file
     files = os.listdir(unprocessed_dir)
     files = sorted([f for f in files if not f[0] == '.']) # Ignore hidden files
-
-    # Iterate through each file
     for file in files:
         path = os.path.join(unprocessed_dir, file)
+        try:
+            photo_number = int(file.replace("_", ",").replace(".", ",").split(",")[-2])
 
-        # Discern photo number by '_' delimiter
-        print(file.replace("_", ",").replace(".", ",").split(","))
-        #photo_number = int(file.replace("_", ",").replace(".", ",").split(","))
+            # See if it fits in the mapping, else error
+            selection = container_df[container_df[unprocessed_dir] == photo_number]
+            num_rows = len(selection.index)
+            if (num_rows != 1):
+                raise Exception("Got {} rows for photo_number {} in {}".format(num_rows, photo_number, unprocessed_dir))
+            row = selection.iloc[0]
 
-        # See if it fits in the mapping, else error
+            # Write the container_id according to the mapping
+            data = { "container_id" : row["container_id"] }
+            write_exif(path, path, data)
+            if read_exif(path) != data:
+                raise Exception("storing custom data in exif failed or was corrupted for {}".format(path))
 
-        # Write the container_id according to the mapping
+            # Success
+            move(path, os.path.join(done_dir, file))
+            accounting[file] = "success"
+            logging.info("Successfully processed {}".format(path))
 
-        # Read to confirm it was written successfully
+        except Exception as e:
+            move(path, os.path.join(error_dir, file))
+            accounting[file] = "failure"
+            logging.error("Failed to process {} : {}".format(path, str(e)))
 
-        # Move to parallel done directory
+    result = pd.Series(accounting)
+    logging.info("Totals:\n" + str(result.sum()))
+    logging.info("Successes:\n" + str(result[result == "success"]))
+    logging.info("Failures:\n" + str(result[result == "failure"]))
 
-        # Record success for statistics
+            
+def check_unique(df):
+    for label, content in df.items():
+        if not content.is_unique:
+            raise Exception("Column {} in csv is not unique".format(label))
 
-        # Log success
+def check_missing(df):
+    for label, content in df.items():
+        if content.isnull().values.any():
+            raise Exception("Column {} in csv is missing a value".format(label))
 
-        # Move to parallel error diretory upon failure
+def check_directory_maps(directory_maps):
+    for dm in directory_maps:
+        if ("unprocessed" not in dm) or ("error" not in dm) or ("done" not in dm):
+            raise Exception("Directory maps missing something") 
 
-        # Log failure
-
-        # Record failure for statistics
-        data = {
-            "container_id" : "taco"
-        }
+def check_mappings(container_df, directory_maps):
+    header = container_df.columns
+    for directory_map in directory_maps:
+        if directory_map["unprocessed"] not in header:
+            raise Exception("Unprocessed dir {} in directory maps is not in container_csv")
 
 def run(container_csv, directory_json, output_log=None):
     log_handlers = [logging.StreamHandler()]
@@ -113,8 +142,12 @@ def run(container_csv, directory_json, output_log=None):
 
     # Iterate through each directory map under "mappings" in the json
     with open(directory_json) as json_file:
-        directory_maps = json.load(json_file)["mappings"]
         container_df = pd.read_csv(container_csv)
+        check_unique(container_df)
+        check_missing(container_df)
+
+        directory_maps = json.load(json_file)["mappings"]
+        check_mappings(container_df, directory_maps)
         for directory_map in directory_maps:
             process(container_df, directory_map)
 
