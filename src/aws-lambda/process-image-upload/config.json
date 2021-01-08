@@ -1,0 +1,6 @@
+{
+	"directory" : {
+		"src_dir" : "images/raw",
+		"dst_dir" : "images/thumbnail"
+	}
+}
