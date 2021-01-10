@@ -18,5 +18,8 @@ Supports .png, .jpg, .jpeg, .tif, .tiff for sure, and hypothetically should supp
 Deployment is a bit hairy for this Lambda.
 
 1. Export Pipfile to overwrite requirements.txt
+```
+pipenv lock -r > requirements.txt
+```
 2. Create a Docker image
 3. Update the Docker image on AWS
