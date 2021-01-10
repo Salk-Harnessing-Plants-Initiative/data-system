@@ -68,8 +68,11 @@ def get_timestamp(s3_client, bucket, image_key, image):
 
 def get_timestamp_from_filename(image_key):
     # Parse timestamp out of file name (explicitly ONLY `YYYYMMDD-HHMMSS` as substring of filename)
-    match = re.search(r'\d{8}-\d{6}', os.path.basename(image_key))
-    return datetime.strptime(match.group(), '%Y%m%d-%H%M%S').astimezone()
+    try:
+        match = re.search(r'\d{8}-\d{6}', os.path.basename(image_key))
+        return datetime.strptime(match.group(), '%Y%m%d-%H%M%S').astimezone()
+    except:
+        return None
 
 def get_timestamp_from_exif(image):
     """ Parse timestamp out of EXIF metadata of .jpg and .tif files
