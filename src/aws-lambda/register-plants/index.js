@@ -45,6 +45,25 @@ exports.handler = async (event) => {
     return {statusCode: 200, container_csv_key: container_csv_key, plant_csv_key: plant_csv_key};
 }
 
+function generate_container_id() {
+    // Notice here that the nanoid is 14 characters instead of the usual 21.
+    var container_id = nanoid(14);
+    while (container_id.startsWith("-")) {
+        // Excel gets confused if a cell starts with "-"
+        container_id = nanoid(14);
+    }
+    return container_id;
+}
+
+function generate_plant_id() {
+    var plant_id = nanoid();
+    while (plant_id.startsWith("-")) {
+        // Excel gets confused if a cell starts with "-"
+        plant_id = nanoid();
+    }
+    return plant_id;
+}
+
 function generate_rows (event) {
     const experiment_id = event.experiment_id;
     const container_type = event.container_type; 
@@ -62,15 +81,14 @@ function generate_rows (event) {
     // Generate containers, plants, and containing relationships
     for (let i = 0; i < num_containers; i++) {
         // Create the container
-        // Notice here that the nanoid is 14 characters instead of the usual 21.
-        const container_id = nanoid(14);
+        const container_id = generate_container_id();
         container_rows.push([container_id, experiment_id, created_by, container_type]);
         container_csv_rows.push([container_id]);
 
         // (Notice here that this is 1-indexed because biologists like it that way!!)
         for (let containing_position = 1; containing_position <= plants_per_container; containing_position++) {
             // Create the plant
-            const plant_id = nanoid();
+            const plant_id = generate_plant_id();
             plant_rows.push([plant_id, experiment_id, created_by, container_id, containing_position]);
             plant_csv_rows.push([plant_id, container_id, containing_position]);
         }
