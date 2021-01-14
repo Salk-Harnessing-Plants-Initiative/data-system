@@ -143,7 +143,7 @@ def insert_into_database(image_key, container_id=None, timestamp=None, user_inpu
         cursor.execute(query, image_key, container_id, timestamp, user_input_filename, thumbnail_key)
 
     except (Exception, Error) as error:
-        raise Exception("Error while connecting to PostgreSQL: {}", error)
+        raise Exception("Error while connecting to PostgreSQL: ", error)
     finally:
         if (connection):
             cursor.close()
