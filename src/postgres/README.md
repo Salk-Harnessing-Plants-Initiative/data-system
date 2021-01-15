@@ -1,0 +1,2 @@
+# Postgres database
+Important: For the table `section`, you should know that `section_id` is deprecated, and you should use `section_name` instead. If you're gonna make QR codes to identify a greenhouse or crop field section in the future, you can just go ahead and directly encode the `section_name` instead of the complicated `section_id` randomized string. There's basically no point in using `section_id` when you can identify a section using `section_name` instead.
