@@ -10,3 +10,9 @@ which are currently connected to that `section_name`.
 ```
 pipenv run python get_email_address.py
 ```
+
+# Manual tests
+* The CSV is created if not preexisting, is updated with new version if preexisting
+* A new relevant row in the database gets reflected in the CSV
+* A deleted row in the database gets reflected in the CSV
+* For each matched experiment, you can see changes reflected in its CSV (not just one experiment)
