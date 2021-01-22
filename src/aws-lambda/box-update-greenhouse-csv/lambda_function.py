@@ -28,23 +28,26 @@ def run(section_name):
     )
     cursor = connection.cursor()
     query = (
-        "SELECT experiment_id, box_csv_folder_id FROM greenhouse_box\n"
-        "WHERE section_name = '{}';".format(section_name)
+        "SELECT greenhouse_box.experiment_id, experiment.box_csv_folder_id FROM greenhouse_box, experiment\n"
+        "WHERE greenhouse_box.experiment_id = experiment.experiment_id AND section_name = '{}';".format(section_name)
     )
     cursor.execute(query)
     results = cursor.fetchall()
     for result in results:
-        experiment_id, box_csv_folder_id = result[0], result[1]
-        query = (
-            "SELECT * FROM section_environment\n" + 
-            "WHERE experiment_id = '{}'\n".format(experiment_id) + 
-            "ORDER BY environment_timestamp ASC;"
-        )
-        df = pandas.io.sql.read_sql(query, connection)
-        filename = "{experiment_id}-environment.csv".format(experiment_id=experiment_id)
-        path = os.path.join("/tmp", filename)
-        df.to_csv(path, index=False)
-        upload(client, box_csv_folder_id, filename, path)
+        try:
+            experiment_id, box_csv_folder_id = result[0], result[1]
+            query = (
+                "SELECT * FROM section_environment\n" + 
+                "WHERE experiment_id = '{}'\n".format(experiment_id) + 
+                "ORDER BY environment_timestamp ASC;"
+            )
+            df = pandas.io.sql.read_sql(query, connection)
+            filename = "{experiment_id}-environment.csv".format(experiment_id=experiment_id)
+            path = os.path.join("/tmp", filename)
+            df.to_csv(path, index=False)
+            upload(client, box_csv_folder_id, filename, path)
+        except Exception as e:
+            print(e)
 
 def upload(box_client, box_folder_id, box_filename, path):
     box_folder = box_client.folder(folder_id=box_folder_id).get()
