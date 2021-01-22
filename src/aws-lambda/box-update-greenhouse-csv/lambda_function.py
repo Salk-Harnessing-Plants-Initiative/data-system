@@ -13,7 +13,7 @@ def lambda_handler(event, context):
         print(e)
         return {
             'statusCode': 400,
-            'body': "sad life: " + str(e)
+            'body': "sad life: " + repr(e)
         }
 
 def run(section_name):
