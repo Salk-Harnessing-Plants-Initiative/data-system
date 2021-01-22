@@ -6,7 +6,7 @@ import pandas
 
 def lambda_handler(event, context):
     try:
-        section_name = event['Records'][0]['section_name']
+        section_name = event['section_name']
         run(section_name)
         return {'statusCode': 200, 'body': json.dumps('Hello from Lambda!')}
     except Exception as e:
