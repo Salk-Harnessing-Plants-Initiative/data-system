@@ -5,7 +5,7 @@
 -- Dumped from database version 12.4
 -- Dumped by pg_dump version 13.0
 
--- Started on 2021-01-21 23:39:40 PST
+-- Started on 2021-01-22 08:54:50 PST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -51,7 +51,8 @@ CREATE TABLE public.experiment (
     description character varying,
     created_by character varying,
     box_image_folder_id character varying,
-    box_csv_folder_id character varying
+    box_csv_folder_id character varying,
+    experiment_name character varying
 );
 
 
@@ -604,7 +605,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON TABLES
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT ON TABLES  TO readaccess;
 
 
--- Completed on 2021-01-21 23:39:46 PST
+-- Completed on 2021-01-22 08:54:55 PST
 
 --
 -- PostgreSQL database dump complete
