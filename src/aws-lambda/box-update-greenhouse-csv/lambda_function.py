@@ -10,7 +10,7 @@ def lambda_handler(event, context):
         run(section_name)
         return {'statusCode': 200, 'body': json.dumps('Hello from Lambda!')}
     except Exception as e:
-        print(e)
+        print(repr(e))
         return {
             'statusCode': 400,
             'body': "sad life: " + repr(e)
@@ -45,6 +45,7 @@ def run(section_name):
                 "ORDER BY environment_timestamp ASC;"
             )
             df = pandas.io.sql.read_sql(query, connection)
+            df['environment_timestamp'] = df['environment_timestamp'].dt.tz_convert('America/Los_Angeles')
             # Dump
             filename = "{experiment_id}-environment.csv".format(experiment_id=experiment_id)
             path = os.path.join("/tmp", filename)
@@ -52,7 +53,7 @@ def run(section_name):
             # Push
             upload(client, box_csv_folder_id, filename, path)
         except Exception as e:
-            print(e)
+            print(repr(e))
 
 def upload(box_client, box_folder_id, box_filename, path):
     box_folder = box_client.folder(folder_id=box_folder_id).get()
