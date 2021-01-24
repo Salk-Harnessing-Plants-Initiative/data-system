@@ -1,6 +1,6 @@
 # Box Update Greenhouse CSV
 When called with a `section_name`, goes and updates all Box environmental data CSVs corresponding to experiments
-which are currently connected to that `section_name`.
+which are currently connected to that `section_name`. Expected to be called if a relevant change to the `section_environment` in Postgres actually happened.
 
 `event` should be `{"section_name" :"thesectionnamehere"}`.
 

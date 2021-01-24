@@ -27,12 +27,15 @@ def run(section_name):
         database=os.environ['database']
     )
     cursor = connection.cursor()
+    # Get all experiments currently linked to this section
     query = (
         "SELECT greenhouse_box.experiment_id, experiment.box_csv_folder_id FROM greenhouse_box, experiment\n"
         "WHERE greenhouse_box.experiment_id = experiment.experiment_id AND section_name = '{}';".format(section_name)
     )
     cursor.execute(query)
     results = cursor.fetchall()
+    # For each experiment, query from scratch all their sections' environment records
+    # And then dump that in the experiment's Box designated folder (box_csv_folder_id)
     for result in results:
         try:
             experiment_id, box_csv_folder_id = result[0], result[1]
@@ -42,9 +45,11 @@ def run(section_name):
                 "ORDER BY environment_timestamp ASC;"
             )
             df = pandas.io.sql.read_sql(query, connection)
+            # Dump
             filename = "{experiment_id}-environment.csv".format(experiment_id=experiment_id)
             path = os.path.join("/tmp", filename)
             df.to_csv(path, index=False)
+            # Push
             upload(client, box_csv_folder_id, filename, path)
         except Exception as e:
             print(e)
