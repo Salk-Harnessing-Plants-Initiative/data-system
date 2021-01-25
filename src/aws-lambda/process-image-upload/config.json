@@ -1,6 +1,6 @@
 {
 	"directory" : {
-		"src_dir" : "images/raw",
-		"dst_dir" : "images/thumbnail"
+		"src_dir" : "image/raw",
+		"dst_dir" : "image/thumbnail"
 	}
 }
