@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 import psycopg2
 import boto3
 
@@ -48,30 +49,30 @@ def get(metadata, tag):
     if tag in metadata:
         return metadata[tag]
     else:
-        return ""
+        return None
 
 def insert_into_image_table(pg_cursor, image_key, metadata):
     file_created = get(metadata, 'file_created')
+    if file_created:
+        file_created = datetime.fromtimestamp(file_created)
     user_input_filename = get(metadata, 'user_input_filename')
     qr_code = get(metadata, 'qr_code')
     qr_codes = get(metadata, 'qr_codes')
     upload_device_id = get(metadata, 'upload_device_id')
     query = (
         "INSERT INTO image (s3_key_raw, image_timestamp, user_input_filename, qr_code, qr_codes, upload_device_id)\n"
-        "VALUES ('{}', '{}', '{}', '{}', '{}', '{}');".format(
-            image_key, file_created, user_input_filename, qr_code, qr_codes, upload_device_id
-        )
+        "VALUES (%s, %s, %s, %s, %s, %s);"
     )
-    pg_cursor.execute(query)
+    data = (image_key, file_created, user_input_filename, qr_code, qr_codes, upload_device_id)
+    pg_cursor.execute(query, data)
 
 def insert_into_image_match_table(pg_cursor, image_key, experiment_id, section_name):
     query = (
         "INSERT INTO image_match (s3_key_raw, experiment_id, section_name)\n"
-        "VALUES ('{}', '{}', '{}');".format(
-            image_key, experiment_id, section_name
-        )
+        "VALUES (%s, %s, %s);"
     )
-    pg_cursor.execute(query)
+    data = (image_key, experiment_id, section_name)
+    pg_cursor.execute(query, data)
 
 def query_matching_experiments(pg_cursor, qr_code):
     query = (
