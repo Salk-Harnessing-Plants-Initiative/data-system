@@ -1,0 +1,9 @@
+{
+	"s3" : {
+		"src_dir" : "images/giraffe/raw"
+	},
+	"box" : {
+		"use_date_subfolder" : true, 
+		"use_section_subfolder" : true
+	}
+}
