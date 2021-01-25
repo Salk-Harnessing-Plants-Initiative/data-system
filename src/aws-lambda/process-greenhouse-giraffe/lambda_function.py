@@ -1,3 +1,5 @@
+# TODO: S3 upload time should be a column
+
 import os
 import json
 from datetime import datetime
