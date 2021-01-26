@@ -5,19 +5,12 @@ import boxsdk
 import psycopg2
 import boto3
 
-with open('config.json') as f:
-    config = json.load(f)
 
-box_client = boxsdk.Client(boxsdk.JWTAuth.from_settings_file('box_config.json'))
-s3_client = boto3.client('s3')
-pg_cursor = psycopg2.connect(
-    user=os.environ['user'],
-    password=os.environ['password'],
-    host=os.environ['host'],
-    port=os.environ['port'],
-    database=os.environ['database']).cursor()
+
+
 
 def lambda_handler(event, context):
+    print("Event: ", event)
     for record in event['Records']:
         try:
             bucket = record['s3']['bucket']['name']
@@ -27,18 +20,35 @@ def lambda_handler(event, context):
             print("Error: ", repr(e))
 
 def process(bucket, image_key):
-    global config
-    global box_client
-    global s3_client
-    global pg_cursor
-    if not image_key_valid(image_key):
+    print("ELMO")
+    box_client = boxsdk.Client(boxsdk.JWTAuth.from_settings_file('box_config.json'))
+    print("BABY")
+    s3_client = boto3.client('s3')
+    print("LEMON")
+    pg_cursor = psycopg2.connect(
+        user=os.environ['user'],
+        password=os.environ['password'],
+        host=os.environ['host'],
+        port=os.environ['port'],
+        database=os.environ['database']).cursor()
+
+    with open('config.json') as f:
+        config = json.load(f)
+
+    print("ALPHA")
+    if not image_key_valid(image_key, config):
         raise Exception("Image key '{}' invalid for filter".format(image_key))
-    
+    print("BETA")
     metadata = s3_client.head_object(Bucket=bucket, Key=image_key)['Metadata']
+    print("GAMMA")
     results = query_matching_box_csv_folder_ids(pg_cursor, metadata['qr_code'])
+    print("DELTA")
     if len(results) > 0:
+        print("EPSILON")
         image_bytes = s3_client.get_object(Bucket=bucket, Key=image_key)['Body'].read()
+        print("THETA")
         do_box_processing(box_client, results, config, metadata)
+    print("MAGMA")
 
 
 def image_key_valid(image_key, config):
@@ -56,6 +66,7 @@ def query_matching_box_csv_folder_ids(pg_cursor, qr_code):
     )
     pg_cursor.execute(query)
     results = pg_cursor.fetchall()
+    print("Results: ", results)
     return results
 
 def do_box_processing(box_client, results, config, metadata):
