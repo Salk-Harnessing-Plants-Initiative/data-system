@@ -74,7 +74,7 @@ def do_box_processing(box_client, results, config, metadata, image_bytes):
     file_created = metadata['file_created']
     user_input_filename = metadata['user_input_filename']
     use_date_subfolder = config['box']['use_date_subfolder']
-    user_section_subfolder = config['box']['use_section_subfolder']
+    use_section_subfolder = config['box']['use_section_subfolder']
 
     used_folder_ids = set()
     for result in results:
