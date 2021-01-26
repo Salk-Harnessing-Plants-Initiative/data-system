@@ -6,6 +6,7 @@ import boxsdk
 import psycopg2
 import boto3
 from datetime import datetime
+import traceback
 
 
 
@@ -19,6 +20,7 @@ def lambda_handler(event, context):
             image_key = record['s3']['object']['key']
             process(bucket, image_key)
         except Exception as e:
+            traceback.print_exc()
             print("Error: ", repr(e))
 
 def process(bucket, image_key):
