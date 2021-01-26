@@ -105,7 +105,7 @@ def upload_to_box(box_client, box_folder_id, file_stream, dst_filename,
     If file_creation_timestamp is provided, then a date subfolder will be used.
     If section_name is provided, then a section subfolder will also be used.
     """
-    root_folder = client.folder(folder_id=box_folder_id).get()
+    root_folder = box_client.folder(folder_id=box_folder_id).get()
     current_folder = root_folder
 
     if file_creation_timestamp is not None:
