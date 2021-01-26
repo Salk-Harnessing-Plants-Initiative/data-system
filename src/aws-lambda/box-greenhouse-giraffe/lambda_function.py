@@ -1,3 +1,4 @@
+# TODO : {'key': 'image/giraffe/raw/IMG_5751+%281%29-593d8390-b03f-4fc3-a230-26a3a3261163.jpg' bug 
 import os
 import io
 import json
@@ -47,7 +48,7 @@ def process(bucket, image_key):
         print("EPSILON")
         image_bytes = s3_client.get_object(Bucket=bucket, Key=image_key)['Body'].read()
         print("THETA")
-        do_box_processing(box_client, results, config, metadata)
+        do_box_processing(box_client, results, config, metadata, image_bytes)
     print("MAGMA")
 
 
@@ -69,7 +70,7 @@ def query_matching_box_csv_folder_ids(pg_cursor, qr_code):
     print("Results: ", results)
     return results
 
-def do_box_processing(box_client, results, config, metadata):
+def do_box_processing(box_client, results, config, metadata, image_bytes):
     file_created = metadata['file_created']
     user_input_filename = metadata['user_input_filename']
     use_date_subfolder = config['box']['use_date_subfolder']

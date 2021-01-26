@@ -1,3 +1,4 @@
+# TODO response = s3_client.head_object(Bucket=bucket, Key=image_key) is bad doesn't work
 import os
 import json
 import re
