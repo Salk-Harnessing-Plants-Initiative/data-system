@@ -4,6 +4,7 @@ FROM public.ecr.aws/lambda/python:3.7
 COPY . ${LAMBDA_TASK_ROOT}
 
 # Install dependencies
+RUN pip install --upgrade requests
 RUN pip install pipenv
 RUN pipenv install --system --deploy --ignore-pipfile
 
