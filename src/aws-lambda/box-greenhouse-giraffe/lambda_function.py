@@ -112,7 +112,7 @@ def upload_to_box(box_client, box_folder_id, file_stream, dst_filename,
     current_folder = root_folder
 
     if file_creation_timestamp is not None:
-        file_creation_date = datetime.fromtimestamp(file_creation_timestamp).strftime('%Y-%m-%d')
+        file_creation_date = datetime.fromisoformat(file_creation_timestamp).strftime('%Y-%m-%d')
         current_folder = get_box_subfolder(current_folder, file_creation_date)
 
     if section_name is not None:
