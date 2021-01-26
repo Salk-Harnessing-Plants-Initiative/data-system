@@ -125,7 +125,7 @@ function make_csv (header_row, rows, experiment_id, topic) {
 
 async function upload (path) {
     const fileContent = fs.readFileSync(path);
-    const key = node_path.basename(path);
+    const key = "tmp/csv/" + node_path.basename(path);
     try {
         const params = {
             Bucket: bucket,
