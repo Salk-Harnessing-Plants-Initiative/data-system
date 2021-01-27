@@ -4,5 +4,5 @@
 	* `raw/`
 * `plate/`:
 	* `raw/`
-	* `thumbnail`
+	* `thumbnail/`
 * `cylinder/`
