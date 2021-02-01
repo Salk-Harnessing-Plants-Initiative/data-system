@@ -3,12 +3,18 @@ import json
 import boxsdk
 import psycopg2
 import pandas
+import try_box
 
 def lambda_handler(event, context):
     try:
-        section_name = event['section_name']
-        run(section_name)
-        return {'statusCode': 200, 'body': json.dumps('Hello from Lambda!')}
+        if 'try_box' in event and event['try_box'] == True:
+            try_box.try_folder_id(event['try_box_folder_id'], 
+                message="" if 'message' not in event else event['message'])
+            return {'statusCode': 200, 'body': json.dumps('Trying the box folder took place')}
+        else:
+            section_name = event['section_name']
+            run(section_name)
+            return {'statusCode': 200, 'body': json.dumps('CSV updating took place')}
     except Exception as e:
         print(repr(e))
         return {
