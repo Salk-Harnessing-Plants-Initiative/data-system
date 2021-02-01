@@ -46,7 +46,7 @@ def run(section_name):
         try:
             experiment_id, box_csv_folder_id = result[0], result[1]
             query = (
-                "SELECT experiment_id, section_name, emitter_ec_ms_cm, emitter_ph, emitter_volume_ml, leach_ec_ms_cm, leach_ph, leach_volume_ml FROM section_environment\n" + 
+                "SELECT experiment_id, section_name, environment_timestamp, emitter_ec_ms_cm, emitter_ph, emitter_volume_ml, leach_ec_ms_cm, leach_ph, leach_volume_ml FROM section_environment\n" + 
                 "WHERE experiment_id = '{}'\n".format(experiment_id) + 
                 "ORDER BY environment_timestamp ASC;"
             )
