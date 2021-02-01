@@ -26,3 +26,6 @@ sudo chmod 755 deploy.sh
 * A new relevant row in the database gets reflected in the CSV
 * A deleted row in the database gets sreflected in the CSV
 * For each matched experiment, you can see changes reflected in its CSV (not just one experiment)
+
+# Notes for whoever inherits this
+If someone asks to add a new data field to collect in the greenhouse, you'll have to update the Retool UI. But also you'll have to update the query in `lambda_function.py` since instead of `SELECT *` I used `SELECT` with all the columns listed in a particular order in order for the CSV to look pretty.
