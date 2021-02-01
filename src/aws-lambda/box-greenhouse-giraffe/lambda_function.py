@@ -8,10 +8,6 @@ import boto3
 from datetime import datetime
 import traceback
 
-
-
-
-
 def lambda_handler(event, context):
     print("Event: ", event)
     for record in event['Records']:
@@ -24,11 +20,8 @@ def lambda_handler(event, context):
             print("Error: ", repr(e))
 
 def process(bucket, image_key):
-    print("ELMO")
     box_client = boxsdk.Client(boxsdk.JWTAuth.from_settings_file('box_config.json'))
-    print("BABY")
     s3_client = boto3.client('s3')
-    print("LEMON")
     pg_cursor = psycopg2.connect(
         user=os.environ['user'],
         password=os.environ['password'],
@@ -39,21 +32,13 @@ def process(bucket, image_key):
     with open('config.json') as f:
         config = json.load(f)
 
-    print("ALPHA")
     if not image_key_valid(image_key, config):
         raise Exception("Image key '{}' invalid for filter".format(image_key))
-    print("BETA")
     metadata = s3_client.head_object(Bucket=bucket, Key=image_key)['Metadata']
-    print("GAMMA")
     results = query_matching_box_csv_folder_ids(pg_cursor, metadata['qr_code'])
-    print("DELTA")
     if len(results) > 0:
-        print("EPSILON")
         image_bytes = s3_client.get_object(Bucket=bucket, Key=image_key)['Body'].read()
-        print("THETA")
         do_box_processing(box_client, results, config, metadata, image_bytes)
-    print("MAGMA")
-
 
 def image_key_valid(image_key, config):
     """Safety filter to ensure we are only processing files from 
@@ -70,7 +55,6 @@ def query_matching_box_csv_folder_ids(pg_cursor, qr_code):
     )
     pg_cursor.execute(query)
     results = pg_cursor.fetchall()
-    print("Results: ", results)
     return results
 
 def do_box_processing(box_client, results, config, metadata, image_bytes):
