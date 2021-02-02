@@ -38,7 +38,7 @@ def process(bucket, image_key):
     results = query_matching_box_csv_folder_ids(pg_cursor, metadata['qr_code'])
     if len(results) > 0:
         image_bytes = s3_client.get_object(Bucket=bucket, Key=image_key)['Body'].read()
-        do_box_processing(box_client, results, config, metadata, image_bytes)
+        do_box_processing(box_client, results, config, metadata, image_bytes, image_key)
 
 def image_key_valid(image_key, config):
     """Safety filter to ensure we are only processing files from 
@@ -57,7 +57,7 @@ def query_matching_box_csv_folder_ids(pg_cursor, qr_code):
     results = pg_cursor.fetchall()
     return results
 
-def do_box_processing(box_client, results, config, metadata, image_bytes):
+def do_box_processing(box_client, results, config, metadata, image_bytes, image_key):
     file_created = metadata['file_created']
     user_input_filename = metadata['user_input_filename']
     use_date_subfolder = config['box']['use_date_subfolder']
@@ -81,10 +81,17 @@ def do_box_processing(box_client, results, config, metadata, image_bytes):
 
         # Upload a copy of the image to Box
         image_stream = io.BytesIO(image_bytes)
-        upload_to_box(box_client, box_image_folder_id, image_stream, user_input_filename,
-            file_creation_timestamp = file_created if use_date_subfolder else None,
-            section_name = section_name if use_section_subfolder else None
-        )    
+        try:
+            upload_to_box(box_client, box_image_folder_id, image_stream, user_input_filename,
+                file_creation_timestamp = file_created if use_date_subfolder else None,
+                section_name = section_name if use_section_subfolder else None
+            )    
+        except:
+            # Try again in case the filename was already taken in the Box folder
+            upload_to_box(box_client, box_image_folder_id, image_stream, os.path.basename(image_key),
+                file_creation_timestamp = file_created if use_date_subfolder else None,
+                section_name = section_name if use_section_subfolder else None
+            )   
 
 def upload_to_box(box_client, box_folder_id, file_stream, dst_filename,
     file_creation_timestamp=None, section_name=None):
