@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 import psycopg2
 import boto3
+import traceback
 
 with open('config.json') as f:
     config = json.load(f)
@@ -27,6 +28,7 @@ def lambda_handler(event, context):
             image_key = record['s3']['object']['key']
             process(bucket, image_key)
         except Exception as e:
+            traceback.print_exc()
             print("Error: ", repr(e))
 
 def process(bucket, image_key):
@@ -39,7 +41,7 @@ def process(bucket, image_key):
         raise Exception("Image key '{}' invalid for filter".format(image_key))
     
     metadata = s3_client.head_object(Bucket=bucket, Key=image_key)['Metadata']
-    s3_last_modified = s3.Object(bucket, image_key).last_modified
+    s3_last_modified = s3_resource.Object(bucket, image_key).last_modified
     insert_into_image_table(pg_cursor, image_key, metadata, s3_last_modified)
     results = query_matching_experiments(pg_cursor, qr_code)
     for result in results:
