@@ -118,7 +118,7 @@ async function do_insert(container_rows, plant_rows) {
 function make_csv (header_row, rows, experiment_id, topic) {
     rows.unshift(header_row);
     const data = stringify(rows);
-    const path = `/tmp/${experiment_id}-new-${topic}-${moment().format("YYYY-MM-DD-HHMMSS")}.csv`;
+    const path = `/tmp/${experiment_id}-new-${topic}-${moment().utcOffset('-0800').format("YYYY-MM-DD-HHMMSS")}.csv`;
     fs.writeFileSync(path, data, 'utf8');
     return path;
 }

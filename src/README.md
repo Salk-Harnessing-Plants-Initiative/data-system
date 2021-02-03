@@ -6,3 +6,6 @@
 	* `raw/`
 	* `thumbnail/`
 * `cylinder/`
+
+`tmp/`:
+* `csv/`
