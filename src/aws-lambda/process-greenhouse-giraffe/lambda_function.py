@@ -1,5 +1,3 @@
-# TODO: S3 upload time should be a column
-
 import os
 import json
 from datetime import datetime
@@ -10,6 +8,7 @@ with open('config.json') as f:
     config = json.load(f)
 
 s3_client = boto3.client('s3')
+s3_resource = boto3.resource('s3')
 pg_cursor = psycopg2.connect(
     user=os.environ['user'],
     password=os.environ['password'],
@@ -34,12 +33,14 @@ def process(bucket, image_key):
     global config
     global box_client
     global s3_client
+    global s3_resource
     global pg_cursor
-    if not image_key_valid(image_key):
+    if not image_key_valid(image_key, config):
         raise Exception("Image key '{}' invalid for filter".format(image_key))
     
     metadata = s3_client.head_object(Bucket=bucket, Key=image_key)['Metadata']
-    insert_into_image_table(pg_cursor, image_key, metadata)
+    s3_last_modified = s3.Object(bucket, image_key).last_modified
+    insert_into_image_table(pg_cursor, image_key, metadata, s3_last_modified)
     results = query_matching_experiments(pg_cursor, qr_code)
     for result in results:
         experiment_id, section_name = result[0], result[1]
@@ -57,7 +58,7 @@ def get(metadata, tag):
     else:
         return None
 
-def insert_into_image_table(pg_cursor, image_key, metadata):
+def insert_into_image_table(pg_cursor, image_key, metadata, s3_last_modified):
     file_created = get(metadata, 'file_created')
     if file_created:
         file_created = datetime.fromtimestamp(file_created)
@@ -66,10 +67,10 @@ def insert_into_image_table(pg_cursor, image_key, metadata):
     qr_codes = get(metadata, 'qr_codes')
     upload_device_id = get(metadata, 'upload_device_id')
     query = (
-        "INSERT INTO image (s3_key_raw, image_timestamp, user_input_filename, qr_code, qr_codes, upload_device_id)\n"
-        "VALUES (%s, %s, %s, %s, %s, %s);"
+        "INSERT INTO image (s3_key_raw, image_timestamp, user_input_filename, qr_code, qr_codes, upload_device_id, s3_upload_timestamp)\n"
+        "VALUES (%s, %s, %s, %s, %s, %s, %s);"
     )
-    data = (image_key, file_created, user_input_filename, qr_code, qr_codes, upload_device_id)
+    data = (image_key, file_created, user_input_filename, qr_code, qr_codes, upload_device_id, s3_last_modified)
     pg_cursor.execute(query, data)
 
 def insert_into_image_match_table(pg_cursor, image_key, experiment_id, section_name):
@@ -90,4 +91,3 @@ def query_matching_experiments(pg_cursor, qr_code):
     pg_cursor.execute(query)
     results = pg_cursor.fetchall()
     return results
-
