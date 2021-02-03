@@ -43,6 +43,8 @@ def process(bucket, image_key):
     metadata = s3_client.head_object(Bucket=bucket, Key=image_key)['Metadata']
     s3_last_modified = s3_resource.Object(bucket, image_key).last_modified
     insert_into_image_table(pg_cursor, image_key, metadata, s3_last_modified)
+
+    qr_code = get(metadata, 'qr_code')
     results = query_matching_experiments(pg_cursor, qr_code)
     for result in results:
         experiment_id, section_name = result[0], result[1]
