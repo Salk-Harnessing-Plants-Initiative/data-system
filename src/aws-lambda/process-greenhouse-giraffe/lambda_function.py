@@ -63,7 +63,7 @@ def get(metadata, tag):
 def insert_into_image_table(pg_cursor, image_key, metadata, s3_last_modified):
     file_created = get(metadata, 'file_created')
     if file_created:
-        file_created = datetime.fromtimestamp(file_created)
+        file_created = datetime.fromisoformat(file_created)
     user_input_filename = get(metadata, 'user_input_filename')
     qr_code = get(metadata, 'qr_code')
     qr_codes = get(metadata, 'qr_codes')
