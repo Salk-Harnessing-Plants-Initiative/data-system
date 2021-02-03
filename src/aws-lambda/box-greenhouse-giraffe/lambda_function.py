@@ -9,8 +9,12 @@ from datetime import datetime
 import traceback
 
 def lambda_handler(event, context):
-    print("Event: ", event)
-    for record in event['Records']:
+    # Parse the SNS event to get the S3 event inside
+    sns_message = event['Records'][0]['Sns']['Message']
+    s3_event = json.loads(sns_message)
+
+    print("Event: ", s3_event)
+    for record in s3_event['Records']:
         try:
             bucket = record['s3']['bucket']['name']
             image_key = record['s3']['object']['key']
