@@ -5,18 +5,6 @@ import psycopg2
 import boto3
 import traceback
 
-with open('config.json') as f:
-    config = json.load(f)
-
-s3_client = boto3.client('s3')
-s3_resource = boto3.resource('s3')
-pg_cursor = psycopg2.connect(
-    user=os.environ['user'],
-    password=os.environ['password'],
-    host=os.environ['host'],
-    port=os.environ['port'],
-    database=os.environ['database']).cursor()
-
 def lambda_handler(event, context):
     # Parse the SNS event to get the S3 event inside
     sns_message = event['Records'][0]['Sns']['Message']
@@ -32,11 +20,19 @@ def lambda_handler(event, context):
             print("Error: ", repr(e))
 
 def process(bucket, image_key):
-    global config
-    global box_client
-    global s3_client
-    global s3_resource
-    global pg_cursor
+    with open('config.json') as f:
+        config = json.load(f)
+    s3_client = boto3.client('s3')
+    s3_resource = boto3.resource('s3')
+    pg_conn = psycopg2.connect(
+        user=os.environ['user'],
+        password=os.environ['password'],
+        host=os.environ['host'],
+        port=os.environ['port'],
+        database=os.environ['database'])
+    pg_conn.autocommit = True
+    pg_cursor = pg_conn.cursor()
+
     if not image_key_valid(image_key, config):
         raise Exception("Image key '{}' invalid for filter".format(image_key))
     
