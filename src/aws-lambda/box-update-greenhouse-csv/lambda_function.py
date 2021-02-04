@@ -51,7 +51,12 @@ def run(section_name):
                 "ORDER BY environment_timestamp ASC;"
             )
             df = pandas.io.sql.read_sql(query, connection)
-            df['environment_timestamp'] = df['environment_timestamp'].dt.tz_convert('America/Los_Angeles')
+            try:
+                # (The try-except is a quick patch around the fact that 
+                # if the query returned nothing then this .dt gets angry)
+                df['environment_timestamp'] = df['environment_timestamp'].dt.tz_convert('America/Los_Angeles')
+            except:
+                pass
             # Dump
             filename = "{experiment_id}-environment.csv".format(experiment_id=experiment_id)
             path = os.path.join("/tmp", filename)
