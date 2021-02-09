@@ -30,11 +30,11 @@ exports.handler = async (event) => {
     let {container_rows, plant_rows, container_csv_rows, plant_csv_rows} = generate_rows(event);
     try {
         // Upload container csv for user to S3
-        const container_csv_header = ["container_id"];
+        const container_csv_header = ["container_id", "container_id_abbrev"];
         container_csv_key = await upload(make_csv(container_csv_header, container_csv_rows, event.experiment_id, event.container_type));
         // Upload plant csv for user to S3
         // line_accession and local_id are headers for blank columns for user to fill in later
-        const plant_csv_header = ["plant_id", "container_id", "containing_position", "line_accession", "local_id"];
+        const plant_csv_header = ["plant_id", "container_id", "plant_id_abbrev", "containing_position", "line_accession", "local_id"];
         plant_csv_key = await upload(make_csv(plant_csv_header, plant_csv_rows, event.experiment_id, "plant"));
         // Insert into Postgres
         await do_insert(container_rows, plant_rows);
@@ -83,14 +83,16 @@ function generate_rows (event) {
         // Create the container
         const container_id = generate_container_id();
         container_rows.push([container_id, experiment_id, created_by, container_type]);
-        container_csv_rows.push([container_id]);
+        const container_id_abbrev = container_id.substring(0, 6);
+        container_csv_rows.push([container_id, container_id_abbrev]);
 
         // (Notice here that this is 1-indexed because biologists like it that way!!)
         for (let containing_position = 1; containing_position <= plants_per_container; containing_position++) {
             // Create the plant
             const plant_id = generate_plant_id();
             plant_rows.push([plant_id, experiment_id, created_by, container_id, containing_position]);
-            plant_csv_rows.push([plant_id, container_id, containing_position]);
+            const plant_id_abbrev = plant_id.substring(0, 6);
+            plant_csv_rows.push([plant_id, container_id, plant_id_abbrev, containing_position]);
         }
     }
     return {container_rows, plant_rows, container_csv_rows, plant_csv_rows};
