@@ -25,7 +25,7 @@ type MyEvent struct {
 }
  
 type MyResponse struct {
-	QrCodeValid bool `json:"qr_code_valid:"`
+	QrCodeValid bool `json:"qr_code_valid"`
 }
 
 func CheckError(err error) {
