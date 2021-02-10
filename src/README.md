@@ -5,7 +5,10 @@
 * `plate/`:
 	* `raw/`
 	* `thumbnail/`
-* `cylinder/`
+* `cylinder/`:
+	* `raw/`:
+		* `{plant_id}/`:
+			* `{folder_identifying_timestamp}/`
 
 `tmp/`:
 * `csv/`
