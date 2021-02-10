@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	host string    = os.Getenv("host")
-	port string    = os.Getenv("port")
-	user string    = os.Getenv("user")
+	host string     = os.Getenv("host")
+	port string        = os.Getenv("port")
+	user string     = os.Getenv("user")
 	password string = os.Getenv("password")
 	database string = os.Getenv("database")
 )
@@ -35,7 +35,7 @@ func CheckError(err error) {
 }
 
 func init() {
-	psqlconn := fmt.Sprintf("host=%s port=%d user=%s "+
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s "+
     	"password=%s dbname=%s sslmode=disable",
     	host, port, user, password, database)
     var err error
