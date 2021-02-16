@@ -84,143 +84,48 @@
 //     lambda.Start(HandleLambdaEvent)
 // }
 
-// func main() {
-//     lambda.Start(router.Handler)
-// }
 
-// // the rest of the code is a redacted example, it will probably reside in a
-// // separate package inside your project
-
-// type listSomethingsInput struct {
-//     ID                string   `lambda:"path.id"`                // a path parameter declared as :id
-//     ShowSomething     bool     `lambda:"query.show_something"`   // a query parameter named "show_something"
-//     AcceptedLanguages []string `lambda:"header.Accept-Language"` // a multi-value header parameter
-// }
-
-// type postSomethingInput struct {
-//     Title   string    `json:"title"`
-//     Date    time.Time `json:"date"`
-// }
-
-// func listSomethings(ctx context.Context, req events.APIGatewayProxyRequest) (
-//     res events.APIGatewayProxyResponse,
-//     err error,
-// ) {
-//     // parse input from request and path parameters
-//     var input listSomethingsInput
-//     err = lmdrouter.UnmarshalRequest(req, false, &input)
-//     if err != nil {
-//         return lmdrouter.HandleError(err)
-//     }
-
-//     // call some business logic that generates an output struct
-//     // ...
-
-//     return lmdrouter.MarshalResponse(http.StatusOK, nil, output)
-// }
-
-// func postSomethings(ctx context.Context, req events.APIGatewayProxyRequest) (
-//     res events.APIGatewayProxyResponse,
-//     err error,
-// ) {
-//     // parse input from request body
-//     var input postSomethingsInput
-//     err = lmdrouter.UnmarshalRequest(req, true, &input)
-//     if err != nil {
-//         return lmdrouter.HandleError(err)
-//     }
-
-//     // call some business logic that generates an output struct
-//     // ...
-
-//     return lmdrouter.MarshalResponse(http.StatusCreated, nil, output)
-// }
-
-// func loggerMiddleware(next lmdrouter.Handler) lmdrouter.Handler {
-//     return func(ctx context.Context, req events.APIGatewayProxyRequest) (
-//         res events.APIGatewayProxyResponse,
-//         err error,
-//     ) {
-//         // [LEVEL] [METHOD PATH] [CODE] EXTRA
-//         format := "[%s] [%s %s] [%d] %s"
-//         level := "INF"
-//         var code int
-//         var extra string
-
-//         res, err = next(ctx, req)
-//         if err != nil {
-//             level = "ERR"
-//             code = http.StatusInternalServerError
-//             extra = " " + err.Error()
-//         } else {
-//             code = res.StatusCode
-//             if code >= 400 {
-//                 level = "ERR"
-//             }
-//         }
-
-//         log.Printf(format, level, req.HTTPMethod, req.Path, code, extra)
-
-//         return res, err
-//     }
-// }
-
-// package main
-
-// import (
-//     "fmt"
-//     "log"
-//     "net/http"
-
-//     "github.com/go-chi/chi"
-//     "github.com/go-chi/chi/middleware"
-//     "github.com/apex/gateway"
-// )
-
-// func main() {
-//     r := chi.NewRouter()
-//     r.Use(middleware.Logger)
-//     r.Get("/", hello)
-//     log.Fatal(gateway.ListenAndServe(":3000", r))
-// }
-
-// func hello(w http.ResponseWriter, r *http.Request) {
-//     fmt.Println("YODEL")
-//     // example retrieving values from the api gateway proxy request context.
-//     requestContext, ok := gateway.RequestContext(r.Context())
-//     if !ok || requestContext.Authorizer["sub"] == nil {
-//         fmt.Fprint(w, "Hello World from Go")
-//         return
-//     }
-
-//     userID := requestContext.Authorizer["sub"].(string)
-//     fmt.Fprintf(w, "Hello %s from Go", userID)
-// }
 
 package main
 
 import (
-    "fmt"
     "log"
+    "context"
     "net/http"
 
-    "github.com/apex/gateway"
+    "github.com/aws/aws-lambda-go/events"
+    "github.com/aws/aws-lambda-go/lambda"
+
+    "github.com/go-chi/chi"
+    //"github.com/go-chi/chi/middleware"
+    "github.com/awslabs/aws-lambda-go-api-proxy/chi"
 )
 
+var chiLambda *chiadapter.ChiLambda
+
+func init() {
+    log.Printf("Cold start")
+    r := chi.NewRouter()
+    //r.Use(middleware.Logger)
+    r.Get("/flatfile-csv", func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("welcome"))
+    })
+    r.Get("/flatfile-csv/taco/", func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("welcome pancake"))
+    })
+    r.Get("/flatfile-csv/taco", func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("welcome apricot"))
+    })
+    chiLambda = chiadapter.New(r)
+}
+
+func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+    // If no name is provided in the HTTP request body, throw an error
+    log.Printf("HELLO THERE!!!")
+    log.Println(req.Path)
+    return chiLambda.ProxyWithContext(ctx, req)
+}
+
 func main() {
-    http.HandleFunc("/", hello)
-    log.Fatal(gateway.ListenAndServe(":3000", nil))
+    lambda.Start(Handler)
 }
-
-func hello(w http.ResponseWriter, r *http.Request) {
-    // example retrieving values from the api gateway proxy request context.
-    requestContext, ok := gateway.RequestContext(r.Context())
-    if !ok || requestContext.Authorizer["sub"] == nil {
-        fmt.Fprint(w, "Hello World from Go")
-        return
-    }
-
-    userID := requestContext.Authorizer["sub"].(string)
-    fmt.Fprintf(w, "Hello %s from Go", userID)
-}
-
