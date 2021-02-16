@@ -8,6 +8,7 @@ import (
     "database/sql"
     "github.com/aws/aws-lambda-go/lambda"
     "github.com/aws/aws-lambda-go/events"
+    "github.com/aquasecurity/lmdrouter"
 
     _ "github.com/lib/pq"
 )
@@ -18,9 +19,10 @@ var (
 	user string     = os.Getenv("user")
 	password string = os.Getenv("password")
 	database string = os.Getenv("database")
-    apikey string = os.Getenv("apikey")
+    apikey string   = os.Getenv("apikey")
 )
 var db *sql.DB
+var router *lmdrouter.Router
 
 
 func CheckError(err error) {
@@ -46,15 +48,26 @@ func HandleLambdaEvent(request events.APIGatewayProxyRequest) (events.APIGateway
 	CheckError(err)
 	response := MyResponse{(count > 0)}
     */
-    // Compare against custom apikey we stored in Lambda env variable
+    // Ad hoc api key validation
     clientApikey, ok := request.QueryStringParameters["apikey"]
     if !ok || apikey != clientApikey {
-        fmt.Println("BAD ", ok, clientApikey)
         return events.APIGatewayProxyResponse{
             StatusCode: http.StatusForbidden,
             Body:       "Invalid API key",
         }, nil
     }
+
+
+    var payload interface{}
+    err := json.Unmarshal([]byte(request.Body), &payload)
+    if err != nil {
+        fmt.Println(err.Error()) 
+    }
+
+    payload["data"]["customer"]["userId"]
+    payload["data"]["customer"]["name"]
+    payload["data"]["validRows"]
+
 
     fmt.Println(request)
     fmt.Println("Hello world people")
