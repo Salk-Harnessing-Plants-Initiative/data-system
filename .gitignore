@@ -7,3 +7,5 @@ lambda-s3/function.zip
 config.yml
 .env
 box_config.json
+src/aws-lambda/flatfile-csv/main
+src/aws-lambda/flatfile-csv/flatfile-csv
