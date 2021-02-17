@@ -8,7 +8,7 @@
 * `cylinder/`:
 	* `raw/`:
 		* `{plant_id}/`:
-			* `{folder_identifying_timestamp}/`
+			* `{image_timestamp_date}/`
 
 `tmp/`:
 * `csv/`
