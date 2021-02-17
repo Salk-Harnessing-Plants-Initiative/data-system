@@ -9,6 +9,7 @@ pyzbar = "*"
 psycopg2-binary = "*"
 boto3 = "*"
 python-dateutil = "*"
+pytz = "*"
 
 [dev-packages]
 

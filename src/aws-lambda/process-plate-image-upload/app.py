@@ -1,3 +1,5 @@
+# TODO: Only timestamp from filename has been tested so far
+# timestamp from exif and timestamp from metadata haven't 
 import os
 import json
 import re
@@ -10,10 +12,9 @@ from pyzbar.pyzbar import decode
 from PIL import Image
 import psycopg2
 from psycopg2 import Error
+import pytz
 
 def lambda_handler(event, context):
-    print("Hello pancake!")
-    print(event)
     for record in event['Records']:
         try:
             process(record)
@@ -47,7 +48,10 @@ def process(record):
         thumbnail_bytes = generate_thumbnail(image)
         thumbnail_key = create_thumbnail_key(image_key)
         upload_thumbnail(s3_client, bucket, thumbnail_key, thumbnail_bytes)
-    except:
+    except Exception as e:
+        traceback.print_exc()
+        msg = "Error: " + repr(e)
+        print(msg)
         thumbnail_key = None
 
     # Record this image in our database
@@ -60,7 +64,6 @@ def process(record):
         upload_device_id=upload_device_id,
         s3_upload_timestamp=s3_upload_timestamp
     )
-
 
 def image_key_valid(image_key):
     with open('config.json') as f:
@@ -78,7 +81,7 @@ def decode_qr(image):
     try:
         # Capable of detecting multiple QRs in image, 
         # but we return arbitrary first QR detected
-        qr_objects = decode(images)
+        qr_objects = decode(image)
         return qr_objects[0].data.decode()
     except:
         return None
@@ -97,7 +100,7 @@ def get_timestamp_from_filename(image_key):
     # Parse timestamp out of file name (explicitly ONLY `YYYYMMDD-HHMMSS` as substring of filename)
     try:
         match = re.search(r'\d{8}-\d{6}', os.path.basename(image_key))
-        return datetime.strptime(match.group(), '%Y%m%d-%H%M%S').astimezone()
+        return datetime.strptime(match.group(), '%Y%m%d-%H%M%S').astimezone(pytz.timezone('America/Los_Angeles'))
     except:
         return None
 
@@ -154,12 +157,15 @@ def get_upload_device_id(s3_client, bucket, image_key):
 
 def generate_thumbnail(image, size=(1000, 1000)):
     buf = BytesIO()
-    thumbnail = image.copy().thumbnail(size)
+    thumbnail = image.copy()
+    thumbnail.thumbnail(size) # Makes into a thumbnail in-place
     thumbnail.save(buf, format='JPEG')
     thumbnail_bytes = buf.getvalue()
     return thumbnail_bytes
 
 def create_thumbnail_key(image_key):
+    # Change the extension to .jpg
+    image_key = os.path.splitext(image_key)[0] + ".jpg"
     with open('config.json') as f:
         config = json.load(f)
         return os.path.join(config['directory']['dst_dir'], os.path.basename(image_key))
@@ -176,6 +182,7 @@ def insert_into_database(image_key, container_id=None, timestamp=None, user_inpu
                                       host=os.environ['host'],
                                       port=os.environ['port'],
                                       database=os.environ['database'])
+        connection.autocommit = True
         # Create a cursor to perform database operations
         cursor = connection.cursor()
         # Executing a SQL query
