@@ -1,6 +1,5 @@
 # TODO: Only timestamp from filename has been tested so far
 # timestamp from exif and timestamp from metadata haven't 
-# TODO: Timezone still doesn't get input into database as los angeles even though we set it
 import os
 import json
 import re
@@ -101,7 +100,8 @@ def get_timestamp_from_filename(image_key):
     # Parse timestamp out of file name (explicitly ONLY `YYYYMMDD-HHMMSS` as substring of filename)
     try:
         match = re.search(r'\d{8}-\d{6}', os.path.basename(image_key))
-        return datetime.strptime(match.group(), '%Y%m%d-%H%M%S').astimezone(pytz.timezone('America/Los_Angeles'))
+        timestamp = pytz.timezone('America/Los_Angeles').localize(datetime.strptime(match.group(), '%Y%m%d-%H%M%S'))
+        return timestamp
     except:
         return None
 
