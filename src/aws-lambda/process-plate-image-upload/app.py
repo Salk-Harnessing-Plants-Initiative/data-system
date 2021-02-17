@@ -1,5 +1,6 @@
 # TODO: Only timestamp from filename has been tested so far
 # timestamp from exif and timestamp from metadata haven't 
+# TODO: Timezone still doesn't get input into database as los angeles even though we set it
 import os
 import json
 import re
