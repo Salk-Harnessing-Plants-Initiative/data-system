@@ -1,10 +1,10 @@
-# TODO response = s3_client.head_object(Bucket=bucket, Key=image_key) is bad doesn't work
 import os
 import json
 import re
 from io import StringIO, BytesIO
 from datetime import datetime
 import dateutil.parser
+import traceback
 import boto3
 from pyzbar.pyzbar import decode
 from PIL import Image
@@ -12,31 +12,55 @@ import psycopg2
 from psycopg2 import Error
 
 def lambda_handler(event, context):
+    print("Hello pancake!")
+    print(event)
     for record in event['Records']:
         try:
             process(record)
-        except:
-            pass
+        except Exception as e:
+            traceback.print_exc()
+            msg = "Error: " + repr(e)
+            print(msg)
+            return { 'statusCode': 400, 'Body' : msg}
+    return { 'statusCode': 200 }
 
 def process(record):
     bucket = record['s3']['bucket']['name']
     image_key = record['s3']['object']['key']
+
+    # Safeguard against invalid triggers and infinite recursion
     if not image_key_valid(image_key):
         raise Exception("Invalid image key: {}".format(image_key))
+
+    # Get relevant metadata about the image
     s3_client = boto3.client('s3')
+    s3_resource = boto3.resource('s3')
     image = download_image(s3_client, bucket, image_key)
     container_id = decode_qr(image)
     timestamp = get_timestamp(s3_client, bucket, image_key, image)
     user_input_filename = get_user_input_filename(s3_client, bucket, image_key)
+    upload_device_id = get_upload_device_id(s3_client, bucket, image_key)
+    s3_upload_timestamp = get_s3_upload_timestamp(s3_resource, bucket, image_key)
+
+    # Try to create a thumbnail copy of the image
     try:
         thumbnail_bytes = generate_thumbnail(image)
         thumbnail_key = create_thumbnail_key(image_key)
         upload_thumbnail(s3_client, bucket, thumbnail_key, thumbnail_bytes)
     except:
         thumbnail_key = None
-    insert_into_database(image_key=image_key, container_id=container_id, timestamp=timestamp,
-        user_input_filename=user_input_filename, thumbnail_key=thumbnail_key)
-    return { 'statusCode': 200 }
+
+    # Record this image in our database
+    insert_into_database(
+        image_key=image_key, 
+        container_id=container_id, 
+        timestamp=timestamp,
+        user_input_filename=user_input_filename, 
+        thumbnail_key=thumbnail_key,
+        upload_device_id=upload_device_id,
+        s3_upload_timestamp=s3_upload_timestamp
+    )
+
 
 def image_key_valid(image_key):
     with open('config.json') as f:
@@ -47,7 +71,7 @@ def image_key_valid(image_key):
 def download_image(s3_client, bucket, image_key):
     s3_response_object = s3_client.get_object(Bucket=bucket, Key=image_key)
     object_content = s3_response_object['Body'].read()
-    image = Image.open(object_content)
+    image = Image.open(BytesIO(object_content))
     return image
 
 def decode_qr(image):
@@ -58,6 +82,8 @@ def decode_qr(image):
         return qr_objects[0].data.decode()
     except:
         return None
+
+# ========== GETTING TIMESTAMP ==========
 
 def get_timestamp(s3_client, bucket, image_key, image):
     timestamp = get_timestamp_from_filename(image_key)
@@ -104,10 +130,25 @@ def get_timestamp_from_s3_metadata(s3_client, bucket, image_key):
     except:
         return None
 
+# ==============================
+
+def get_s3_upload_timestamp(s3_resource, bucket, image_key):
+    try:
+        return s3_resource.Object(bucket, image_key).last_modified
+    except:
+        return None
+
 def get_user_input_filename(s3_client, bucket, image_key):
     try:
         response = s3_client.head_object(Bucket=bucket, Key=image_key)
         return dateutil.parser.parse(response['Metadata']['user_input_filename'])
+    except:
+        return None
+
+def get_upload_device_id(s3_client, bucket, image_key):
+    try:
+        response = s3_client.head_object(Bucket=bucket, Key=image_key)
+        return dateutil.parser.parse(response['Metadata']['upload_device_id'])
     except:
         return None
 
@@ -126,7 +167,8 @@ def create_thumbnail_key(image_key):
 def upload_thumbnail(s3_client, bucket, thumbnail_key, thumbnail_bytes):
     s3_client.put_object(Body=thumbnail_bytes, Bucket=bucket, Key=thumbnail_key)
 
-def insert_into_database(image_key, container_id=None, timestamp=None, user_input_filename=None, thumbnail_key=None):
+def insert_into_database(image_key, container_id=None, timestamp=None, user_input_filename=None, thumbnail_key=None,
+    upload_device_id=None, s3_upload_timestamp=None):
     try:
         # Connect to an existing database
         connection = psycopg2.connect(user=os.environ['user'],
@@ -138,10 +180,11 @@ def insert_into_database(image_key, container_id=None, timestamp=None, user_inpu
         cursor = connection.cursor()
         # Executing a SQL query
         query = (
-            "INSERT INTO image (raw, container_id, image_timestamp, user_input_filename, thumbnail)"
-            "VALUES (%s, %s, %s, %s, %s);"
+            "INSERT INTO image (s3_key_raw, qr_code, image_timestamp, user_input_filename, s3_key_thumbnail, upload_device_id, s3_upload_timestamp)"
+            "VALUES (%s, %s, %s, %s, %s, %s, %s);"
         )
-        cursor.execute(query, image_key, container_id, timestamp, user_input_filename, thumbnail_key)
+        data = (image_key, container_id, timestamp, user_input_filename, thumbnail_key, upload_device_id, s3_upload_timestamp)
+        cursor.execute(query, data)
 
     except (Exception, Error) as error:
         raise Exception("Error while connecting to PostgreSQL: ", error)
