@@ -146,7 +146,7 @@ def get_s3_upload_timestamp(s3_resource, bucket, image_key):
 def get_user_input_filename(s3_client, bucket, image_key):
     try:
         response = s3_client.head_object(Bucket=bucket, Key=image_key)
-        return dateutil.parser.parse(response['Metadata']['user_input_filename'])
+        return response['Metadata']['user_input_filename']
     except Exception as e:
         print("Couldn't get user_input_filename ", e)
         return None
@@ -154,7 +154,7 @@ def get_user_input_filename(s3_client, bucket, image_key):
 def get_upload_device_id(s3_client, bucket, image_key):
     try:
         response = s3_client.head_object(Bucket=bucket, Key=image_key)
-        return dateutil.parser.parse(response['Metadata']['upload_device_id'])
+        return response['Metadata']['upload_device_id']
     except Exception as e:
         print("Couldn't get upload_device_id: ", e)
         return None
