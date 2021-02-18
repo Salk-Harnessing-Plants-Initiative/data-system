@@ -31,6 +31,6 @@ We don't currently have a wiki, so the best context for code is this readme and 
 `tmp/`:
 * `csv/`
 
-## Greenhouse Giraffe Lambdas
-Most of the other Lambdas are not tied together in any complicated way, but since the greenhouse giraffe ones are a special case I've diagramed the relationship here for you in case it's helpful:
+## Greenhouse giraffe lambdas
+Most of the other lambdas are not tied together in any complicated way, but since the greenhouse giraffe ones are a special case I've diagramed the relationship here for you in case it's helpful:
 <img src="./doc/greenhouse_giraffe_lambdas.png" height="300"> 
