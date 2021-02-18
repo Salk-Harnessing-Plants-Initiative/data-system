@@ -15,6 +15,8 @@ We don't currently have a wiki, so the best context for code is this readme and 
 * https://github.com/Salk-Harnessing-Plants-Initiative/data-system-tools: Tools for cleaning data before uploading it into the data system, and tools for querying the data system for biocomputation research projects (e.g. stitching greenhouse Giraffe images for foliage analysis)
 
 # Architecture
+We use Postgres for our database, AWS Lambda for the backend, Retool for the frontend, and have various scripts running on client computers to upload images.
+
 
 ## S3 structure
 `image/`:
