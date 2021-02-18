@@ -42,4 +42,4 @@ Most of the other lambdas are not tied together in any complicated way, but sinc
 One of the main features of this data system is its ability to integrate QR codes:
 
 
-<img src="./doc/plate_barcode_example.jpg" height="300"> 
+<img src="./doc/plate_barcode_example.jpg" height="500"> 
