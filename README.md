@@ -41,7 +41,29 @@ Most of the other lambdas are not tied together in any complicated way, but sinc
 
 
 # QR code integration
-One of the main features of this data system is its ability to integrate QR codes:
+One of the main features of this data system is its ability to process QR codes to automate some of our processes. QR codes are conceptually simple in the sense that you can technically encode any string you want into them. For our purposes, we **strictly** encode an ID into the QR code (and **not** arbitrary metadata) so that the code can be integrated with the rest of our data system in a very logical manner. 
 
 
 <img src="./doc/plate_barcode_example.jpg" height="500"> 
+
+## plant_id vs container_id vs section_name
+This might be a little confusing at first, but basically we have 3 different categories of QR codes for use in different contexts to integrate all the diverse data we work with.
+
+* `plant_id` is the globally unique identifier of a literal plant individual/organism. It's a 1:1 relationship. If you have 1 seedling or 1 corn stalk, the `plant_id` is just for that seedling or corn stalk. Not for a species, not for a variety, not for a line or accession.
+
+* `container_id` is the globally unique identifier of the container some plant(s) is (are) grown in. Such as an agar plate, a plastic cylinder, a pocket of a tray, or a plastic pot. This is the container where you are actually growing the plant(s) for the experiment, so if you're sprouting the seedlings somewhere and then transferring them to a container, we are referring to the post-transfer container. A `plant_id` can only have one `container_id` (and they're associated when the IDs are originally generated), but a `container_id` can have multiple `plant_id`s. So if you have an agar plate with 12 seedlings in it, for instance, each seedling will have a `plant_id`, and all of those `plant_id`s will be hard linked to a single `container_id`. (There's a thing called a `containing_index` which tells you the relative location of a `plant_id` inside a `container_id`).
+
+* `section_name` is the identifier of a partition of a greenhouse or outdoor crop field. It is constant and exists regardless of what plants are growing on it. A good example of this is each growing table in the Encinitas greenhouse, such as `EG-01-01`,..., `EG-01-10`, ..., `EG-04-01`,..., `EG-04-10`. Another example of this might be various subplots of land where we would do a field study. Though the plants may come and go, the `section_name` of a particular growing table stays the same. (Never use `section_id` which is deprecated/legacy).
+
+
+The thing is that we use QR codes both as a way to automatically sort our images and as a barcode that you can scan with a handheld barcode scanner. Sometimes these goals are at odds with each other, which is how it's led us to the following rules about which class of QR codes should get encoded: 
+
+* If you are working with agar plates, you should always encode the `container_id` as the QR code on the label during label-printing. (This comes from the design consideration that agar plates almost always have many seedlings growing in them. And also that people only do digital--not physical--phenotyping of agar plates, so nobody is using a handheld barcode scanner). **All agar plate image scans will only be sorted by `container_id`-based QR codes.** 
+
+* If you are working with plastic cylinders or normal plant pots, you should almost always encode the `plant_id` as the QR code on the label, and ensure that you have one label for each plant. This is because someone will likely be using a handheld barcode scanner to scan each plant when doing physical phenotypic measurements and manual data entry. However, **all cylinder images, 3D scan images, and X-ray images will be capable of being sorted by both `plant_id` and `container_id`-based QR codes.** 
+	* This is because we have to account for the cases where someone is doing a competition experiment where they are trying to grow 2 plants in the same container to study how they compete with each other. Only in that particular case should you have an extra label with the `container_id` and use that label when doing imaging. But please, try to stick to `plant_id` otherwise.
+
+* If you are imaging entire partitions of a greenhouse or crop field, encode `section_name` as the QR code used on signs to identify the section. For instance, in the Encinitas greenhouse we use `section_name` as the QR code on big laminated signs so that when we take top-down images of the growing tables using the Greenhouse Giraffe or otherwise, the images get associated with that section. **All Greenhouse Giraffe images will only be sorted by `section_name`-based QR codes.** 
+
+
+
