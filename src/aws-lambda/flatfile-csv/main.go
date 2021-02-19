@@ -5,8 +5,11 @@ import (
     "context"
     "fmt"
     "os"
+    "io/ioutil"
     "net/http"
     "database/sql"
+
+    "github.com/tidwall/gjson"
 
     "github.com/aws/aws-lambda-go/events"
     "github.com/aws/aws-lambda-go/lambda"
@@ -33,12 +36,7 @@ func init() {
     r.Get("/flatfile-csv", func(w http.ResponseWriter, r *http.Request) {
         w.Write([]byte("welcome"))
     })
-    r.Get("/flatfile-csv/taco/", func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("welcome pancake"))
-    })
-    r.Get("/flatfile-csv/taco", func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("welcome apricot"))
-    })
+    r.Post("/flatfile-csv/submit/plant", submitPlant)
     chiLambda = chiadapter.New(r)
 
     // Postgres
@@ -51,6 +49,34 @@ func init() {
         log.Fatal(err)
     }
 }
+
+func submitPlant(w http.ResponseWriter, r *http.Request) {
+    body, err := ioutil.ReadAll(r.Body)
+    CheckError(err)
+    
+    data := string(body)
+    value := gjson.Get(data, "data.customer.userId")
+    println(value.String())
+
+    //fmt.Println("userId is ", payload["data"]["customer"]["userId"])
+    //fmt.Println("name is ", payload["data"]["customer"]["name"])
+    //fmt.Println("validRows is ", payload["data"]["validRows"])
+}
+
+func CheckError(err error) {
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+
+/*
+r.Get("/flatfile-csv/taco/", func(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("welcome pancake"))
+})
+r.Get("/flatfile-csv/taco", func(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("welcome apricot"))
+})
+*/
 
 /*
 func HandleLambdaEvent(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -68,10 +94,9 @@ func HandleLambdaEvent(request events.APIGatewayProxyRequest) (events.APIGateway
         fmt.Println(err.Error()) 
     }
 
-    payload["data"]["customer"]["userId"]
-    payload["data"]["customer"]["name"]
-    payload["data"]["validRows"]
-
+    
+    
+    
 
     fmt.Println(request)
     fmt.Println("Hello world people")
