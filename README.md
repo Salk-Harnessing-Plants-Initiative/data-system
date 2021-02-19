@@ -46,15 +46,16 @@ One of the main features of this data system is its ability to process QR codes 
 
 <img src="./doc/plate_barcode_example.jpg" height="500"> 
 
-## plant_id vs container_id vs section_name
+## Explained: plant_id vs container_id vs section_name
 This might be a little confusing at first, but basically we have 3 different categories of QR codes for use in different contexts to integrate all the diverse data we work with.
 
 * `plant_id` is the globally unique identifier of a literal plant individual/organism. It's a 1:1 relationship. If you have 1 seedling or 1 corn stalk, the `plant_id` is just for that seedling or corn stalk. Not for a species, not for a variety, not for a line or accession.
 
-* `container_id` is the globally unique identifier of the container some plant(s) is (are) grown in. Such as an agar plate, a plastic cylinder, a pocket of a tray, or a plastic pot. This is the container where you are actually growing the plant(s) for the experiment, so if you're sprouting the seedlings somewhere and then transferring them to a container, we are referring to the post-transfer container. A `plant_id` can only have one `container_id` (and they're associated when the IDs are originally generated), but a `container_id` can have multiple `plant_id`s. So if you have an agar plate with 12 seedlings in it, for instance, each seedling will have a `plant_id`, and all of those `plant_id`s will be hard linked to a single `container_id`. (There's a thing called a `containing_index` which tells you the relative location of a `plant_id` inside a `container_id`).
+* `container_id` is the globally unique identifier of the container some plant(s) are grown in. Such as an agar plate, a plastic cylinder, a pocket of a tray, or a plastic pot. This is the container where you are actually growing the plant(s) for the experiment, so if you're sprouting the seedlings somewhere and then transferring them to a container, we are referring to the post-transfer container. A `plant_id` can only have one `container_id` (and they're associated when the IDs are originally generated), but a `container_id` can have multiple `plant_id`s. So if you have an agar plate with 12 seedlings in it, for instance, each seedling will have a `plant_id`, and all of those `plant_id`s will be hard linked to a single `container_id`. (There's a thing called a `containing_index` which tells you the relative location of a `plant_id` inside a `container_id`).
 
 * `section_name` is the identifier of a partition of a greenhouse or outdoor crop field. It is constant and exists regardless of what plants are growing on it. A good example of this is each growing table in the Encinitas greenhouse, such as `EG-01-01`,..., `EG-01-10`, ..., `EG-04-01`,..., `EG-04-10`. Another example of this might be various subplots of land where we would do a field study. Though the plants may come and go, the `section_name` of a particular growing table stays the same. (Never use `section_id` which is deprecated/legacy).
 
+### Rules
 
 The thing is that we use QR codes both as a way to automatically sort our images and as a barcode that you can scan with a handheld barcode scanner. Sometimes these goals are at odds with each other, which is how it's led us to the following rules about which class of QR codes should get encoded: 
 
