@@ -40,13 +40,13 @@ Most of the other lambdas are not tied together in any complicated way, but sinc
 <img src="./doc/greenhouse_giraffe_lambdas.png" height="300"> 
 
 
-# QR code integration
+## QR code integration
 One of the main features of this data system is its ability to process QR codes to automate some of our processes. QR codes are conceptually simple in the sense that you can technically encode any string you want into them. For our purposes, we **strictly** encode an ID into the QR code (and **not** arbitrary metadata) so that the code can be integrated with the rest of our data system in a very logical manner. 
 
 
 <img src="./doc/plate_barcode_example.jpg" height="500"> 
 
-## Explained: plant_id vs container_id vs section_name
+### Explained: plant_id vs container_id vs section_name
 This might be a little confusing at first, but basically we have 3 different categories of QR codes for use in different contexts to integrate all the diverse data we work with.
 
 * `plant_id` is the globally unique identifier of a literal plant individual/organism. It's a 1:1 relationship. If you have 1 seedling or 1 corn stalk, the `plant_id` is just for that seedling or corn stalk. Not for a species, not for a variety, not for a line or accession.
@@ -55,7 +55,7 @@ This might be a little confusing at first, but basically we have 3 different cat
 
 * `section_name` is the identifier of a partition of a greenhouse or outdoor crop field. It is constant and exists regardless of what plants are growing on it. A good example of this is each growing table in the Encinitas greenhouse, such as `EG-01-01`,..., `EG-01-10`, ..., `EG-04-01`,..., `EG-04-10`. Another example of this might be various subplots of land where we would do a field study. Though the plants may come and go, the `section_name` of a particular growing table stays the same. (Never use `section_id` which is deprecated/legacy).
 
-### Rules
+#### Rules
 
 The thing is that we use QR codes both as a way to automatically sort our images and as a barcode that you can scan with a handheld barcode scanner. Sometimes these goals are at odds with each other, which is how it's led us to the following rules about which class of QR codes should get encoded: 
 
