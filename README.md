@@ -33,6 +33,12 @@ We use Postgres for our database, AWS Lambda for the backend, Retool for the fro
 `tmp/`:
 * `csv/`
 
+## Greenhouse giraffe lambdas
+Most of the other lambdas are not tied together in any complicated way, but since the greenhouse giraffe ones are a special case I've diagramed the relationship here for you in case it's helpful:
+
+
+<img src="./doc/greenhouse_giraffe_lambdas.png" height="300"> 
+
 
 ## QR code integration
 One of the main features of this data system is its ability to process QR codes to automate some of our processes. QR codes are conceptually simple in the sense that you can technically encode any string you want into them. For our purposes, we **strictly** encode an ID into the QR code (and **not** arbitrary metadata) so that the code can be integrated with the rest of our data system in a very logical manner. 
@@ -61,13 +67,6 @@ The thing is that we use QR codes both as a way to automatically sort our images
 	* But as a developer working on this data system, you should know that all images with the exception of Greenhouse Giraffe images should ultimately get identified by `container_id` in order to make querying easy and unified later. (So transform given `plant_id`s to `container_id` on the backend). 
 
 * If you are imaging entire partitions of a greenhouse or crop field, encode `section_name` as the QR code used on signs to identify the section. For instance, in the Encinitas greenhouse we use `section_name` as the QR code on big laminated signs so that when we take top-down images of the growing tables using the Greenhouse Giraffe or otherwise, the images get associated with that section. **All Greenhouse Giraffe images will only be sorted by `section_name`-based QR codes.** 
-
-
-## Greenhouse giraffe lambdas
-Most of the other lambdas are not tied together in any complicated way, but since the greenhouse giraffe ones are a special case I've diagramed the relationship here for you in case it's helpful:
-
-
-<img src="./doc/greenhouse_giraffe_lambdas.png" height="300"> 
 
 
 
