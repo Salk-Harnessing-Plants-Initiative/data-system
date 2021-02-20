@@ -1,6 +1,7 @@
 package main
 
 import (
+    "errors"
     "log"
     "context"
     "fmt"
@@ -38,7 +39,9 @@ func init() {
         w.Write([]byte("welcome"))
     })
     r.Post("/flatfile-csv/submit/plant", submitPlant)
-    r.Post("/flatfile-csv/submit/plant_data", submitPlant)
+    r.Post("/flatfile-csv/submit/plant_data", submitPlantData)
+    r.Post("/flatfile-csv/submit/line_accession", submitLineAccession)
+    r.Post("/flatfile-csv/submit/container", submitContainer)
     chiLambda = chiadapter.New(r)
 
     // Postgres
@@ -52,122 +55,117 @@ func init() {
     }
 }
 
-func submitPlant(w http.ResponseWriter, r *http.Request) {
-    body, err := ioutil.ReadAll(r.Body)
-    CheckError(err)
-    
-    // userId
-    payload := string(body)
-    userIdResult := gjson.Get(payload, "data.customer.userId")
-    if !userIdResult.Exists() {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Missing parameter customer.userId"))
-        return
-    }
-    userId := userIdResult.String()
+func sendErrorResponse(w http.ResponseWriter, err error) {
+    w.WriteHeader(http.StatusBadRequest)
+    w.Write([]byte(err.Error()))
+    log.Println("Error:", err)
+}
 
+func synthesizeSubmitPayload(payload string) (string, error) {
+    // metadata stored as stringified json in data.customer.name
+    customerNameField := gjson.Get(payload, "data.customer.name")
+    if !customerNameField.Exists() {
+        return "", errors.New("missing parameter data.customer.name")
+    }
+    var metadata map[string]interface{}
+    err := json.Unmarshal([]byte(customerNameField.String()), &metadata)
+    if err != nil {
+        return "", err
+    }
     // validRows
     var validRows []map[string]interface{}
     err = json.Unmarshal([]byte(gjson.Get(payload, "data.validRows").String()), &validRows)
     if err != nil {
-        fmt.Println(err.Error())
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte(err.Error()))
-        return 
+        return "", err
     }
     if len(validRows) == 0 {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("No validRows given"))
+        return "", errors.New("no validRows given")
+    }
+    // add a copy of each metadata field to each row
+    for i := 0; i < len(validRows); i++ {
+        for key, val := range metadata {
+            validRows[i][key] = val
+        }         
+    }
+    output, err := json.Marshal(validRows)
+    return string(output), err
+}
+
+func submitPlant(w http.ResponseWriter, r *http.Request) {
+    body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        sendErrorResponse(w, err)
         return
     }
-
-    for i := 0; i < len(validRows); i++ {
-        validRows[i]["created_by"] = userId
+    jsonData, err := synthesizeSubmitPayload(string(body))
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
     }
-
-    newData, err := json.Marshal(validRows)
-    CheckError(err)
-    fmt.Println("validRows, marshalled, is ", string(newData))
-
-    //fmt.Println("userId is ", userId)
-    //fmt.Println("name is ", name)
-    //fmt.Println("validRows is ", validRows)
-
-    w.WriteHeader(http.StatusOK)
+    _, err = db.Exec(`INSERT INTO plant SELECT * FROM json_populate_recordset (NULL::plant, $1);`, jsonData)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    w.WriteHeader(http.StatusCreated)
 }
 
 func submitPlantData(w http.ResponseWriter, r *http.Request) {
-    /*
     body, err := ioutil.ReadAll(r.Body)
-    CheckError(err)
-    
-    payload := string(body)
-    userId := gjson.Get(payload, "data.customer.userId").String()
-    metadata := gjson.Get(payload, "data.customer.name")
-
-
-
-
-    timestamp := gjson.Get(payload, "timestamp").String()
-    validRows := gjson.Get(payload, "data.validRows").Array()
-
-    fmt.Println("userId is ", userId)
-    fmt.Println("name is ", name)
-    fmt.Println("validRows is ", validRows)
-    */
-}
-
-func CheckError(err error) {
     if err != nil {
-        log.Fatal(err)
-    }
-}
-
-/*
-
-    validRows := gjson.Get(payload, "data.validRows").Array()
-    if len(validRows) == 0 {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("No validRows given"))
+        sendErrorResponse(w, err)
         return
     }
-
-r.Get("/flatfile-csv/taco/", func(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("welcome pancake"))
-})
-r.Get("/flatfile-csv/taco", func(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("welcome apricot"))
-})
-*/
-
-/*
-func HandleLambdaEvent(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var count int
-	row := db.QueryRow(`SELECT COUNT(*) FROM "plant" WHERE "plant_id" = $1 OR "container_id" = $1`, event.QrCode)
-	err := row.Scan(&count)
-	CheckError(err)
-	response := MyResponse{(count > 0)}
-    
-    // =====
-    
-    var payload interface{}
-    err := json.Unmarshal([]byte(request.Body), &payload)
+    jsonData, err := synthesizeSubmitPayload(string(body))
     if err != nil {
-        fmt.Println(err.Error()) 
+        sendErrorResponse(w, err)
+        return
     }
-
-    
-    
-    
-
-    fmt.Println(request)
-    fmt.Println("Hello world people")
-    return events.APIGatewayProxyResponse{
-        StatusCode: http.StatusOK,
-        Body:       "Howdy mc howdy",
-    }, nil
+    _, err = db.Exec(`INSERT INTO plant_data SELECT * FROM json_populate_recordset (NULL::plant_data, $1);`, jsonData)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    w.WriteHeader(http.StatusCreated)
 }
-*/
+
+func submitLineAccession(w http.ResponseWriter, r *http.Request) {
+    body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    jsonData, err := synthesizeSubmitPayload(string(body))
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    _, err = db.Exec(`INSERT INTO line_accession SELECT * FROM json_populate_recordset (NULL::line_accession, $1);`, jsonData)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    w.WriteHeader(http.StatusCreated)
+}
+
+func submitContainer(w http.ResponseWriter, r *http.Request) {
+    body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    jsonData, err := synthesizeSubmitPayload(string(body))
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    _, err = db.Exec(`INSERT INTO container SELECT * FROM json_populate_recordset (NULL::container, $1);`, jsonData)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    w.WriteHeader(http.StatusCreated)
+}
  
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
     // Ad hoc api key validation; preferably should have been chi middleware but oh well
