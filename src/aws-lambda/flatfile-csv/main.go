@@ -6,6 +6,7 @@ import (
     "fmt"
     "os"
     "io/ioutil"
+    "encoding/json"
     "net/http"
     "database/sql"
 
@@ -37,6 +38,7 @@ func init() {
         w.Write([]byte("welcome"))
     })
     r.Post("/flatfile-csv/submit/plant", submitPlant)
+    r.Post("/flatfile-csv/submit/plant_data", submitPlant)
     chiLambda = chiadapter.New(r)
 
     // Postgres
@@ -54,13 +56,65 @@ func submitPlant(w http.ResponseWriter, r *http.Request) {
     body, err := ioutil.ReadAll(r.Body)
     CheckError(err)
     
-    data := string(body)
-    value := gjson.Get(data, "data.customer.userId")
-    println(value.String())
+    // userId
+    payload := string(body)
+    userIdResult := gjson.Get(payload, "data.customer.userId")
+    if !userIdResult.Exists() {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte("Missing parameter customer.userId"))
+        return
+    }
+    userId := userIdResult.String()
 
-    //fmt.Println("userId is ", payload["data"]["customer"]["userId"])
-    //fmt.Println("name is ", payload["data"]["customer"]["name"])
-    //fmt.Println("validRows is ", payload["data"]["validRows"])
+    // validRows
+    var validRows []map[string]interface{}
+    err = json.Unmarshal([]byte(gjson.Get(payload, "data.validRows").String()), &validRows)
+    if err != nil {
+        fmt.Println(err.Error())
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte(err.Error()))
+        return 
+    }
+    if len(validRows) == 0 {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte("No validRows given"))
+        return
+    }
+
+    for i := 0; i < len(validRows); i++ {
+        validRows[i]["created_by"] = userId
+    }
+
+    newData, err := json.Marshal(validRows)
+    CheckError(err)
+    fmt.Println("validRows, marshalled, is ", string(newData))
+
+    //fmt.Println("userId is ", userId)
+    //fmt.Println("name is ", name)
+    //fmt.Println("validRows is ", validRows)
+
+    w.WriteHeader(http.StatusOK)
+}
+
+func submitPlantData(w http.ResponseWriter, r *http.Request) {
+    /*
+    body, err := ioutil.ReadAll(r.Body)
+    CheckError(err)
+    
+    payload := string(body)
+    userId := gjson.Get(payload, "data.customer.userId").String()
+    metadata := gjson.Get(payload, "data.customer.name")
+
+
+
+
+    timestamp := gjson.Get(payload, "timestamp").String()
+    validRows := gjson.Get(payload, "data.validRows").Array()
+
+    fmt.Println("userId is ", userId)
+    fmt.Println("name is ", name)
+    fmt.Println("validRows is ", validRows)
+    */
 }
 
 func CheckError(err error) {
@@ -70,6 +124,14 @@ func CheckError(err error) {
 }
 
 /*
+
+    validRows := gjson.Get(payload, "data.validRows").Array()
+    if len(validRows) == 0 {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte("No validRows given"))
+        return
+    }
+
 r.Get("/flatfile-csv/taco/", func(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("welcome pancake"))
 })
