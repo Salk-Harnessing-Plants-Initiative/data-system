@@ -21,7 +21,7 @@ exports.handler = async (event) => {
 
     let queryResult;
     try {
-    	queryResult = await pool.query(`INSERT INTO plant SELECT * FROM json_populate_recordset (NULL::json_table, '${validData}');`)
+    	queryResult = await pool.query(`INSERT INTO plant SELECT * FROM json_populate_recordset (NULL::plant, '${validData}');`)
     } catch(err) {
         console.log(err);
         return {statusCode: 400, body: err.stack};
