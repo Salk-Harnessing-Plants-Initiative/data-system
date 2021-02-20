@@ -108,6 +108,7 @@ func submit(w http.ResponseWriter, r *http.Request, query string) {
         return
     }
     w.WriteHeader(http.StatusCreated)
+    log.Println("Success")
 }
 
 func submitPlant(w http.ResponseWriter, r *http.Request) {
