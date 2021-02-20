@@ -91,7 +91,7 @@ func synthesizeSubmitPayload(payload string) (string, error) {
     return string(output), err
 }
 
-func submitPlant(w http.ResponseWriter, r *http.Request) {
+func submit(w http.ResponseWriter, r *http.Request, query string) {
     body, err := ioutil.ReadAll(r.Body)
     if err != nil {
         sendErrorResponse(w, err)
@@ -102,69 +102,28 @@ func submitPlant(w http.ResponseWriter, r *http.Request) {
         sendErrorResponse(w, err)
         return
     }
-    _, err = db.Exec(`INSERT INTO plant SELECT * FROM json_populate_recordset (NULL::plant, $1);`, jsonData)
+    _, err = db.Exec(query, jsonData)
     if err != nil {
         sendErrorResponse(w, err)
         return
     }
     w.WriteHeader(http.StatusCreated)
+}
+
+func submitPlant(w http.ResponseWriter, r *http.Request) {
+    submit(w, r, `INSERT INTO plant SELECT * FROM json_populate_recordset (NULL::plant, $1);`)
 }
 
 func submitPlantData(w http.ResponseWriter, r *http.Request) {
-    body, err := ioutil.ReadAll(r.Body)
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    jsonData, err := synthesizeSubmitPayload(string(body))
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    _, err = db.Exec(`INSERT INTO plant_data SELECT * FROM json_populate_recordset (NULL::plant_data, $1);`, jsonData)
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    w.WriteHeader(http.StatusCreated)
+    submit(w, r, `INSERT INTO plant_data SELECT * FROM json_populate_recordset (NULL::plant_data, $1);`)
 }
 
 func submitLineAccession(w http.ResponseWriter, r *http.Request) {
-    body, err := ioutil.ReadAll(r.Body)
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    jsonData, err := synthesizeSubmitPayload(string(body))
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    _, err = db.Exec(`INSERT INTO line_accession SELECT * FROM json_populate_recordset (NULL::line_accession, $1);`, jsonData)
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    w.WriteHeader(http.StatusCreated)
+    submit(w, r, `INSERT INTO line_accession SELECT * FROM json_populate_recordset (NULL::line_accession, $1);`)
 }
 
 func submitContainer(w http.ResponseWriter, r *http.Request) {
-    body, err := ioutil.ReadAll(r.Body)
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    jsonData, err := synthesizeSubmitPayload(string(body))
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    _, err = db.Exec(`INSERT INTO container SELECT * FROM json_populate_recordset (NULL::container, $1);`, jsonData)
-    if err != nil {
-        sendErrorResponse(w, err)
-        return
-    }
-    w.WriteHeader(http.StatusCreated)
+    submit(w, r, `INSERT INTO container SELECT * FROM json_populate_recordset (NULL::container, $1);`)
 }
  
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
