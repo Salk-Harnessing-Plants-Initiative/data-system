@@ -61,6 +61,7 @@ func sendErrorResponse(w http.ResponseWriter, err error) {
     log.Println("Error:", err)
 }
 
+// adds a copy of each metadata field to each row
 func synthesizeSubmitPayload(payload string) (string, error) {
     // metadata stored as stringified json in data.customer.name
     customerNameField := gjson.Get(payload, "data.customer.name")
