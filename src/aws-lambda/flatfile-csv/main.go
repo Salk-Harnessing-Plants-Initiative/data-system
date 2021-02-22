@@ -40,6 +40,9 @@ func init() {
     })
     r.Post("/flatfile-csv/submit/plant", submitPlant)
     r.Post("/flatfile-csv/submit/plant_data", submitPlantData)
+    r.Get("/flatfile-csv/submit/line_accession", func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("howdy"))
+    })
     r.Post("/flatfile-csv/submit/line_accession", submitLineAccession)
     r.Post("/flatfile-csv/submit/container", submitContainer)
     chiLambda = chiadapter.New(r)
@@ -92,6 +95,35 @@ func synthesizeSubmitPayload(payload string) (string, error) {
     return string(output), err
 }
 
+func GrabFields(jsonData string) ([]string, error) {
+    var rows []map[string]interface{}
+    err := json.Unmarshal([]byte(jsonData), &rows)
+    if err != nil {
+        return []string{}, err
+    }
+
+    fields := []string{}
+    for key := range rows[0] {
+        fields = append(fields, key)
+    }
+    return fields, nil
+}
+
+func GenerateSetListing(fields []string) string {
+    x := ""
+    for i, field := range fields {
+        if i != 0 {
+            x += "    "
+        }
+        x += fmt.Sprintf("%s = subquery.%s", field, field)
+        if i == len(fields) - 1 {
+            x += ","
+        }
+        x += "\n"
+    }
+    return x
+}
+
 func submit(w http.ResponseWriter, r *http.Request, query string) {
     body, err := ioutil.ReadAll(r.Body)
     if err != nil {
@@ -112,8 +144,39 @@ func submit(w http.ResponseWriter, r *http.Request, query string) {
     log.Println("Success")
 }
 
+func submitUpdate(w http.ResponseWriter, r *http.Request, query string) {
+    body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    jsonData, err := synthesizeSubmitPayload(string(body))
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    fields, err := GrabFields(jsonData)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    setListing := GenerateSetListing(fields)
+    _, err = db.Exec(query, jsonData, setListing)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+    w.WriteHeader(http.StatusCreated)
+    log.Println("Success")
+}
+
 func submitPlant(w http.ResponseWriter, r *http.Request) {
-    submit(w, r, `INSERT INTO plant SELECT * FROM json_populate_recordset (NULL::plant, $1);`)
+    submitUpdate(w, r, 
+`WITH subquery AS (SELECT * FROM json_populate_recordset (NULL::plant, $1))
+UPDATE plant
+SET $2
+FROM subquery
+WHERE plant.plant_id = subquery.plant_id;`)
 }
 
 func submitPlantData(w http.ResponseWriter, r *http.Request) {
