@@ -116,7 +116,7 @@ func GenerateSetListing(fields []string) string {
             x += "    "
         }
         x += fmt.Sprintf("%s = subquery.%s", field, field)
-        if i == len(fields) - 1 {
+        if i != len(fields) - 1 {
             x += ","
         }
         x += "\n"
@@ -161,7 +161,9 @@ func submitUpdate(w http.ResponseWriter, r *http.Request, query string) {
         return
     }
     setListing := GenerateSetListing(fields)
-    _, err = db.Exec(query, jsonData, setListing)
+    almostQuery := fmt.Sprintf(query, setListing)
+    fmt.Println(almostQuery)
+    _, err = db.Exec(almostQuery, jsonData)
     if err != nil {
         sendErrorResponse(w, err)
         return
@@ -171,10 +173,11 @@ func submitUpdate(w http.ResponseWriter, r *http.Request, query string) {
 }
 
 func submitPlant(w http.ResponseWriter, r *http.Request) {
+    // https://stackoverflow.com/a/45465626/14775744
     submitUpdate(w, r, 
 `WITH subquery AS (SELECT * FROM json_populate_recordset (NULL::plant, $1))
 UPDATE plant
-SET $2
+SET %s
 FROM subquery
 WHERE plant.plant_id = subquery.plant_id;`)
 }
