@@ -40,7 +40,7 @@ def image_key_valid(image_key, config):
     """Safety filter to ensure we are only processing files from 
     the correct directory in the bucket
     """
-    return (os.path.dirname(image_key) == config['s3']['src_dir'])
+    return image_key.startswith(config['s3']['src_dir'])
 
 def get(metadata, tag):
     if tag in metadata:
