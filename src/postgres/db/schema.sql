@@ -76,7 +76,8 @@ CREATE TABLE public.image (
     qr_code character varying,
     upload_device_id character varying,
     qr_codes character varying,
-    s3_upload_timestamp timestamp with time zone
+    s3_upload_timestamp timestamp with time zone,
+    upload_session character varying
 );
 
 
@@ -542,3 +543,5 @@ ALTER TABLE ONLY public.line_accession
 -- Dbmate schema migrations
 --
 
+INSERT INTO public.schema_migrations (version) VALUES
+    ('20210226020602');
