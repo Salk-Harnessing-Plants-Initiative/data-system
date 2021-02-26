@@ -10,22 +10,3 @@ sudo chmod 755 deploy.sh
 ./deploy.sh
 ```
 "Deploy New Image" in the Lambda. (Also ensure environment variables for postgres are set if you haven't done so already).
-
-# How to query the images
-The whole point of storing these images is for some future computational experiments in the lab whereby we are applying computer vision techniques on the top-down foliage images of greenhouse plants. You'll probably have to explain to the person doing these experiments how to query the images (or query for them):
-
-```
-SELECT * FROM image
-WHERE experiment_id = 'yourexperiment-id-here', section_name = 'the-section-name-here', date(image_timestamp) = yourdatehere
-ORDER BY image_timestamp ASC;
-```
-
-This query allows you to get the images for a particular experiment, a particular section (like a crop field or part of a greenhouse), and a particular date.
-
-Then what you're gonna have to do is use the AWS S3 keys provided by `raw` column and download from there.  
-
-Depending on how the plants were imaged and what the study is about, you might even have to stitch the photos together to get one big, continuous image of a particular section that you're examining. If this is the case, then the fact that we have done `ORDER BY image_timestamp ASC` means that if the person who did the imaging with the Giraffe chronologically imaged the section from left to right, then you get the correct order of the photos for stitching. 
-
-Lastly, this is very unlikely, but if your query returns rows with different `upload_device_id` values, then that means that the images were taken by different Giraffes. So if you're trying to get the contiguous images, you need to hold the `upload_device_id` fixed in your query  filter accordingly. 
-
-Hopefully some of these notes are helpful :)
