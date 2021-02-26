@@ -1,0 +1,65 @@
+import os
+import json
+from datetime import datetime
+import psycopg2
+import boto3
+import traceback
+
+def lambda_handler(event, context):
+    for record in event['Records']:
+        try:
+            bucket = record['s3']['bucket']['name']
+            image_key = record['s3']['object']['key']
+            process(bucket, image_key)
+        except Exception as e:
+            traceback.print_exc()
+            print("Error: ", repr(e))
+
+def process(bucket, image_key):
+    with open('config.json') as f:
+        config = json.load(f)
+    s3_client = boto3.client('s3')
+    s3_resource = boto3.resource('s3')
+    pg_conn = psycopg2.connect(
+        user=os.environ['user'],
+        password=os.environ['password'],
+        host=os.environ['host'],
+        port=os.environ['port'],
+        database=os.environ['database'])
+    pg_conn.autocommit = True
+    pg_cursor = pg_conn.cursor()
+
+    if not image_key_valid(image_key, config):
+        raise Exception("Image key '{}' invalid for filter".format(image_key))
+    
+    metadata = s3_client.head_object(Bucket=bucket, Key=image_key)['Metadata']
+    s3_last_modified = s3_resource.Object(bucket, image_key).last_modified
+    insert_into_image_table(pg_cursor, image_key, metadata, s3_last_modified)
+
+def image_key_valid(image_key, config):
+    """Safety filter to ensure we are only processing files from 
+    the correct directory in the bucket
+    """
+    return (os.path.dirname(image_key) == config['s3']['src_dir'])
+
+def get(metadata, tag):
+    if tag in metadata:
+        return metadata[tag]
+    else:
+        return None
+
+def insert_into_image_table(pg_cursor, image_key, metadata, s3_last_modified):
+    file_created = get(metadata, 'file_created')
+    if file_created:
+        file_created = datetime.fromisoformat(file_created)
+    user_input_filename = get(metadata, 'user_input_filename')
+    qr_code = get(metadata, 'qr_code')
+    qr_codes = get(metadata, 'qr_codes')
+    upload_session = get(metadata, 'upload_session')
+    upload_device_id = get(metadata, 'upload_device_id')
+    query = (
+        "INSERT INTO image (s3_key_raw, image_timestamp, user_input_filename, qr_code, qr_codes, upload_device_id, s3_upload_timestamp, upload_session)\n"
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s);"
+    )
+    data = (image_key, file_created, user_input_filename, qr_code, qr_codes, upload_device_id, s3_last_modified, upload_session)
+    pg_cursor.execute(query, data)
