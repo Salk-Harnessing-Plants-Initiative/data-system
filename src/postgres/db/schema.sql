@@ -407,6 +407,13 @@ CREATE INDEX fki_species_fkey ON public.experiment USING btree (species);
 
 
 --
+-- Name: fki_species_ref_fkey; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX fki_species_ref_fkey ON public.line_accession USING btree (species);
+
+
+--
 -- Name: plant container_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
