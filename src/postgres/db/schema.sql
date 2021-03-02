@@ -14,6 +14,18 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: column_reference; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.column_reference (
+    column_table character varying NOT NULL,
+    column_name character varying NOT NULL,
+    column_type character varying NOT NULL,
+    column_description character varying NOT NULL
+);
+
+
+--
 -- Name: container; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -214,6 +226,14 @@ CREATE TABLE public.species (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     created_by character varying
 );
+
+
+--
+-- Name: column_reference column_reference_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.column_reference
+    ADD CONSTRAINT column_reference_pkey PRIMARY KEY (column_table, column_name);
 
 
 --
@@ -544,4 +564,5 @@ ALTER TABLE ONLY public.line_accession
 --
 
 INSERT INTO public.schema_migrations (version) VALUES
-    ('20210226020602');
+    ('20210226020602'),
+    ('20210301180245');
