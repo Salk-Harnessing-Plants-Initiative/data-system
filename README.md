@@ -13,6 +13,7 @@ We don't currently have a wiki, so the best context for code is this readme and 
 ## Tools for researchers
 * https://github.com/Salk-Harnessing-Plants-Initiative/excel-barcode-scanner-guide: Encode `plant_id` or `container_id` into a QR/barcode label and use a barcode scanner for rapid phenotypic data entry. The resultant spreadsheet can be uploaded to the data system
 * https://github.com/Salk-Harnessing-Plants-Initiative/data-system-tools: Tools for cleaning data before uploading it into the data system, and tools for querying the data system for biocomputation research projects (e.g. stitching greenhouse Giraffe images for foliage analysis)
+* https://github.com/Salk-Harnessing-Plants-Initiative/nsipptparser: Simple Python package to parse `.nsippt` files which are files that contain length annotation measurements from slice plane "Views" of North Star Imaging X-ray reconstructions. Basically you can open reconstruction files (e.g., `.nsihdr`) using North Star Imaging's analysis software tool and measure root lengths. (The equivalent of ImageJ). You can Export the root length measurements by exporting the View, and the output file type is `.nsippt`. This Python package will convert `.nsippt` to JSON for you. You will be able to extract any of the length measurements as well as a useful thumbnail of the View in base64. 
 
 # Architecture
 We use Postgres for our database, AWS Lambda for the backend, Retool for the frontend, and have various scripts running on client computers to upload images.
