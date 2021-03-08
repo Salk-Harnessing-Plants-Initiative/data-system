@@ -65,7 +65,7 @@ func sendErrorResponse(w http.ResponseWriter, err error) {
 }
 
 // adds a copy of each metadata field to each row
-func synthesizeSubmitPayload(payload string) (string, error) {
+func SynthesizeSubmitPayload(payload string) (string, error) {
     // metadata stored as stringified json in data.customer.name
     customerNameField := gjson.Get(payload, "data.customer.name")
     if !customerNameField.Exists() {
@@ -90,6 +90,16 @@ func synthesizeSubmitPayload(payload string) (string, error) {
         for key, val := range metadata {
             validRows[i][key] = val
         }         
+    }
+    // replace empty strings with nil so that it marshals as null in json
+    for i := 0; i < len(validRows); i++ {
+        for k, v := range validRows[i] {
+            if str, ok := v.(string); ok {
+                if len(str) == 0 {
+                    validRows[i][k] = nil
+                }
+            } 
+        }
     }
     output, err := json.Marshal(validRows)
     return string(output), err
@@ -130,7 +140,7 @@ func submit(w http.ResponseWriter, r *http.Request, query string) {
         sendErrorResponse(w, err)
         return
     }
-    jsonData, err := synthesizeSubmitPayload(string(body))
+    jsonData, err := SynthesizeSubmitPayload(string(body))
     if err != nil {
         sendErrorResponse(w, err)
         return
@@ -150,7 +160,7 @@ func submitUpdate(w http.ResponseWriter, r *http.Request, query string) {
         sendErrorResponse(w, err)
         return
     }
-    jsonData, err := synthesizeSubmitPayload(string(body))
+    jsonData, err := SynthesizeSubmitPayload(string(body))
     if err != nil {
         sendErrorResponse(w, err)
         return
