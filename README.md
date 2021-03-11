@@ -3,6 +3,8 @@ The main Salk HPI Data System for tracking plants and their phenotypic data in t
 
 We don't currently have a wiki, so the best context for code is this readme and the readmes that are closest to each bit of code. However, there are some generally useful notes you can find here: https://www.notion.so/Salk-Harnessing-Plants-Initiative-Software-Engineering-Wiki-8b4c2524c41b4a4dae847a4b61cde92a
 
+Concept as of March 2021: https://docs.google.com/presentation/d/1EFnYIE4aLeLNuLu7ud0ikeX_zSn1_6kez7k2p-ynouQ/edit?usp=sharing
+
 # Related repos
 
 ## S3 uploader services running as clients on imager computers
