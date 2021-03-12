@@ -11,7 +11,9 @@
   "dependencies": {
     "aws-sdk": "^2.819.0",
     "csv-stringify": "^5.6.0",
+    "exceljs": "^4.2.1",
     "fs": "0.0.1-security",
+    "mocha": "^8.3.1",
     "moment": "^2.29.1",
     "nanoid": "^3.1.20",
     "path": "^0.12.7",
