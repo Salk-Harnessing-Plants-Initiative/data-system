@@ -38,7 +38,7 @@ function generate_workbook(num_containers, plants_per_container) {
 	create_container_cell_formulas(num_containers, plants_per_container, container_sheet, 
 		plant_predefined_cols.length, container_predefined_cols.length);
 
-	workbook.xlsx.writeFile("/Users/russelltran/Desktop/deleteme/hellothere.xlsx");
+	return workbook;
 }
 
 function create_container_column_names(plants_per_container, container_sheet, 
@@ -110,7 +110,3 @@ function letterToColumn(letter) {
 	}
 	return column;
 }
-
-
-//console.log(columnToLetter(1));
-generate_workbook(1000, 3)
