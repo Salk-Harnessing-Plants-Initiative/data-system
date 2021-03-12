@@ -26,7 +26,7 @@ function generate_workbook(num_containers, plants_per_container) {
 	container_sheet.properties.defaultColWidth = 15;
 	const container_predefined_cols = [
 	  { header: 'container_id', key: 'container_id', width: 25 },
-	  { header: 'container_id_abbrev', key: 'plant_id_abbrev', width: 20}
+	  { header: 'container_id_abbrev', key: 'container_id_abbrev', width: 20}
 	];
 	container_sheet.columns = container_predefined_cols;
 
