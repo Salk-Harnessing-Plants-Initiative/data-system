@@ -3,7 +3,7 @@ const MAX_PLANT_COLUMNS = 50;
 const PLANT_SHEET_NAME = 'plant_metadata';
 const CONTAINER_SHEET_NAME = 'container_metadata';
 
-function generate_workbook(num_containers, plants_per_container) {
+function generate_workbook(num_containers, plants_per_container, container_csv_rows, plant_csv_rows) {
 	const workbook = new ExcelJS.Workbook();
 
 	// set up plant_metadata sheet
@@ -12,8 +12,8 @@ function generate_workbook(num_containers, plants_per_container) {
 	const plant_predefined_cols = [
 		{ header: 'plant_id', key: 'plant_id', width: 30 },
 		{ header: 'container_id', key: 'container_id', width: 25 },
-		{ header: 'containing_position', key: 'containing_position', width: 17},
-		{ header: 'plant_id_abbrev', key: 'plant_id_abbrev', width: 16}
+		{ header: 'plant_id_abbrev', key: 'plant_id_abbrev', width: 16},
+		{ header: 'containing_position', key: 'containing_position', width: 17}
 	];
 	const plant_blank_cols = [
 		{ header: 'line_accession', key: 'line_accession', width: 19},
@@ -30,6 +30,11 @@ function generate_workbook(num_containers, plants_per_container) {
 	  { header: 'container_id_abbrev', key: 'container_id_abbrev', width: 20}
 	];
 	container_sheet.columns = container_predefined_cols;
+
+	// add generated data
+	plant_sheet.addRows(plant_csv_rows);
+	container_sheet.addRows(container_csv_rows);
+
 
 	// generate container_metadata column name formulas that reference plant_metadata column names
 	create_container_column_names(plants_per_container, container_sheet, 
@@ -111,3 +116,5 @@ function letterToColumn(letter) {
 	}
 	return column;
 }
+
+module.exports = { generate_workbook };
