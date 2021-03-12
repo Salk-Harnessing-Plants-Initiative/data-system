@@ -65,9 +65,9 @@ function create_container_cell_formulas(num_containers, plants_per_container,
 	
 	// iterate down over the rows in container sheet
 	for (var container_row = 2; container_row <= num_containers + 1; container_row++) {
-		var plant_col = num_predefined_plant_cols + 1;
 		const baseline_plant_row = 2 + (container_row - 2) * plants_per_container;
 		var plant_row = baseline_plant_row;
+		var plant_col = num_predefined_plant_cols + 1;
 		// iterate left to right over the non-predefined container columns 
 		for (var container_col = num_predefined_container_cols + 1; 
 			container_col <= num_predefined_container_cols + num_generated_container_cols;
