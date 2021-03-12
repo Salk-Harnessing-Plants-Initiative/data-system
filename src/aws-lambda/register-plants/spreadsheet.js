@@ -17,7 +17,8 @@ function generate_workbook(num_containers, plants_per_container) {
 	];
 	const plant_blank_cols = [
 		{ header: 'line_accession', key: 'line_accession', width: 19},
-		{ header: 'local_id', key: 'local_id', width: 14}
+		{ header: 'local_id', key: 'local_id', width: 14},
+		{ header: 'local_batch', key: 'local_id', width: 14}
 	];
 	plant_sheet.columns = plant_predefined_cols.concat(plant_blank_cols);
 
