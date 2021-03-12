@@ -1,5 +1,5 @@
 const ExcelJS = require('exceljs');
-const MAX_PLANT_COLUMNS = 100;
+const MAX_PLANT_COLUMNS = 50;
 const PLANT_SHEET_NAME = 'plant_metadata';
 const CONTAINER_SHEET_NAME = 'container_metadata';
 
@@ -61,11 +61,11 @@ function create_container_column_names(plants_per_container, container_sheet,
 
 function create_container_cell_formulas(num_containers, plants_per_container, 
 	container_sheet, num_predefined_plant_cols, num_predefined_container_cols) {
-	const num_generated_container_cols = plants_per_container * MAX_PLANT_COLUMNS
-	var plant_col = num_predefined_plant_cols + 1;
+	const num_generated_container_cols = plants_per_container * MAX_PLANT_COLUMNS;
 	
 	// iterate down over the rows in container sheet
 	for (var container_row = 2; container_row <= num_containers + 1; container_row++) {
+		var plant_col = num_predefined_plant_cols + 1;
 		const baseline_plant_row = 2 + (container_row - 2) * plants_per_container;
 		var plant_row = baseline_plant_row;
 		// iterate left to right over the non-predefined container columns 
@@ -84,7 +84,7 @@ function create_container_cell_formulas(num_containers, plants_per_container,
 			// e.g. done with "1_line_accession", "2_line_accession", "3_line_accession" and about to 
 			// move on to "1_local_id", so reset to baseline row and move to the column to the right
 			plant_row++;
-			if plant_row - baseline_plant_row > plants_per_container {
+			if (plant_row - baseline_plant_row >= plants_per_container) {
 				plant_row = baseline_plant_row;
 				plant_col++;
 			}
@@ -113,4 +113,4 @@ function letterToColumn(letter) {
 
 
 //console.log(columnToLetter(1));
-generate_workbook(10, 2)
+generate_workbook(1000, 3)
