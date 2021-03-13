@@ -30,16 +30,8 @@ const s3 = new AWS.S3();
 
 exports.handler = async (event) => {
     let {container_rows, plant_rows, container_csv_rows, plant_csv_rows} = generate_rows(event);
+    let workbook_s3_key;
     try {
-        /*
-        // Upload container csv for user to S3
-        const container_csv_header = ["container_id", "container_id_abbrev"];
-        container_csv_key = await upload(make_csv(container_csv_header, container_csv_rows, event.experiment_id, event.container_type));
-        // Upload plant csv for user to S3
-        // line_accession and local_id are headers for blank columns for user to fill in later
-        const plant_csv_header = ["plant_id", "container_id", "plant_id_abbrev", "containing_position", "line_accession", "local_id"];
-        plant_csv_key = await upload(make_csv(plant_csv_header, plant_csv_rows, event.experiment_id, "plant"));
-        */
         // Insert into Postgres
         await do_insert(container_rows, plant_rows);
 
@@ -50,7 +42,7 @@ exports.handler = async (event) => {
         const experiment_id = event.experiment_id;
         const path = `/tmp/${experiment_id}_${nanoid(4)}.xlsx`; // TODO make distinctions for additional registrations
         await workbook.xlsx.writeFile(path);
-        workbook_s3_key = await upload(path); // TODO FIX IMPLICIT GLOBAL VARIABLE    
+        workbook_s3_key = await upload(path); 
 
     } catch (err) {
         console.log(err);
@@ -127,8 +119,6 @@ async function do_insert(container_rows, plant_rows) {
     } catch(err) {
         throw err;
     }
-
-    console.log(queryResult);
 }
 
 function make_csv (header_row, rows, experiment_id, topic) {
