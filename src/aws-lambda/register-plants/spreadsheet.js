@@ -2,6 +2,7 @@ const ExcelJS = require('exceljs');
 const MAX_PLANT_COLUMNS = 50;
 const PLANT_SHEET_NAME = 'plant_metadata';
 const CONTAINER_SHEET_NAME = 'container_metadata';
+const LINE_ACCESSION_SHEET_NAME = 'line_accession_metadata'
 
 function generate_workbook(num_containers, plants_per_container, container_csv_rows, plant_csv_rows) {
 	const workbook = new ExcelJS.Workbook();
@@ -30,6 +31,15 @@ function generate_workbook(num_containers, plants_per_container, container_csv_r
 	  { header: 'container_id_abbrev', key: 'container_id_abbrev', width: 20}
 	];
 	container_sheet.columns = container_predefined_cols;
+
+	// set up line_accession_metadata sheet
+	const line_accession_sheet = workbook.addWorksheet(LINE_ACCESSION_SHEET_NAME, {views:[{state: 'frozen', xSplit: 0, ySplit:1}]});
+	line_accession_sheet.properties.defaultColWidth = 15;
+	line_accession_sheet.columns = [
+		{ header: 'line_accession', key: 'line_accession', width: 15 },
+		{ header: 'gene', key: 'gene', width: 15 },
+		{ header: 'agi', key: 'agi', width: 15 }
+	];
 
 	// add generated data
 	plant_sheet.addRows(plant_csv_rows);
