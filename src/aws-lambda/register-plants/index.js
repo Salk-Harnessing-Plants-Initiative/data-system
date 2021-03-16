@@ -5,6 +5,10 @@ Russell Tran
 December 2020
 */
 
+
+// TODO: container_metadata formula as an option
+// TODO: every-other-group shading for plant_metadata as an option
+
 // For CSVs
 const moment = require('moment')
 const stringify = require('csv-stringify/lib/sync');
