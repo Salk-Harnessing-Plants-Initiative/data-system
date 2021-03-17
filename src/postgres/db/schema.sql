@@ -163,6 +163,26 @@ CREATE TABLE public.plant (
 
 
 --
+-- Name: protocol; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.protocol (
+    protocol_name character varying NOT NULL,
+    protocol_url character varying
+);
+
+
+--
+-- Name: protocol_match; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.protocol_match (
+    protocol_name character varying NOT NULL,
+    experiment_id character varying NOT NULL
+);
+
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -293,19 +313,27 @@ ALTER TABLE ONLY public.line_accession
 
 
 --
--- Name: plant local_id_constraint; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.plant
-    ADD CONSTRAINT local_id_constraint UNIQUE (experiment_id, local_id);
-
-
---
 -- Name: plant plant_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.plant
     ADD CONSTRAINT plant_pkey PRIMARY KEY (plant_id);
+
+
+--
+-- Name: protocol_match protocol_match_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.protocol_match
+    ADD CONSTRAINT protocol_match_pkey PRIMARY KEY (protocol_name, experiment_id);
+
+
+--
+-- Name: protocol protocol_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.protocol
+    ADD CONSTRAINT protocol_pkey PRIMARY KEY (protocol_name);
 
 
 --
@@ -483,6 +511,14 @@ ALTER TABLE ONLY public.image_match
 
 
 --
+-- Name: protocol_match experiment_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.protocol_match
+    ADD CONSTRAINT experiment_fkey FOREIGN KEY (experiment_id) REFERENCES public.experiment(experiment_id) NOT VALID;
+
+
+--
 -- Name: section_environment experiment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -565,4 +601,5 @@ ALTER TABLE ONLY public.line_accession
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20210226020602'),
-    ('20210301180245');
+    ('20210301180245'),
+    ('20210317181112');
