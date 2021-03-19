@@ -2,7 +2,8 @@ const ExcelJS = require('exceljs');
 const MAX_PLANT_COLUMNS = 50;
 const PLANT_SHEET_NAME = 'plant_metadata';
 const CONTAINER_SHEET_NAME = 'container_metadata';
-const LINE_ACCESSION_SHEET_NAME = 'line_accession_metadata'
+const LINE_ACCESSION_SHEET_NAME = 'line_accession_metadata';
+const INSTRUCTIONS_SHEET_NAME = 'barcode_instructions';
 
 function generate_workbook(num_containers, plants_per_container, container_csv_rows, plant_csv_rows) {
 	const workbook = new ExcelJS.Workbook();
@@ -40,6 +41,15 @@ function generate_workbook(num_containers, plants_per_container, container_csv_r
 		{ header: 'gene', key: 'gene', width: 15 },
 		{ header: 'agi', key: 'agi', width: 15 }
 	];
+
+	// set up an instructions sheet
+	const instructions_sheet = workbook.addWorksheet(INSTRUCTIONS_SHEET_NAME, {views: []});
+	instructions_sheet.getCell('A1').value = "INSTRUCTIONS FOR BARCODING";
+	instructions_sheet.getCell('A2').value = "For agar plate experiments ONLY,"
+		+ " you should print barcodes using the container_id and the container_metadata sheet."
+		+ " (Populate the plant_metadata sheet to load container_metadata)";
+	instructions_sheet.getCell('A3').value = "For all other experiments, print barcodes using" 
+		+ " the plant_id and only use the plant_metadata sheet";
 
 	// add generated data
 	plant_sheet.addRows(plant_csv_rows);
