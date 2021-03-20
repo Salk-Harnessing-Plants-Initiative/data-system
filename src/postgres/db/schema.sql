@@ -163,6 +163,17 @@ CREATE TABLE public.plant (
 
 
 --
+-- Name: plant_data; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.plant_data (
+    plant_id character varying NOT NULL,
+    data_timestamp timestamp with time zone NOT NULL,
+    height_cm numeric
+);
+
+
+--
 -- Name: protocol; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -310,6 +321,14 @@ ALTER TABLE ONLY public.image
 
 ALTER TABLE ONLY public.line_accession
     ADD CONSTRAINT line_accession_pkey PRIMARY KEY (line_accession, species);
+
+
+--
+-- Name: plant_data plant_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.plant_data
+    ADD CONSTRAINT plant_data_pkey PRIMARY KEY (plant_id, data_timestamp);
 
 
 --
@@ -602,4 +621,5 @@ ALTER TABLE ONLY public.line_accession
 INSERT INTO public.schema_migrations (version) VALUES
     ('20210226020602'),
     ('20210301180245'),
-    ('20210317181112');
+    ('20210317181112'),
+    ('20210320051505');
