@@ -7,7 +7,7 @@ import (
     "fmt"
     "strings"
     "os"
-    "strconv"
+    // "strconv"
     "io/ioutil"
     "encoding/json"
     "net/http"
@@ -80,7 +80,7 @@ func ValidatePlant(w http.ResponseWriter, r *http.Request) {
 
     sendErrorResponse(w, errors.New("Function not written yet"))
     return
-    
+
     /*
     body, err := ioutil.ReadAll(r.Body)
     if err != nil {
