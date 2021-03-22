@@ -66,13 +66,6 @@ window.Retool.subscribe(function(model) {
     return returnedEmails;
   });
 
-  importer.registerRecordHook(record => {
-    console.log(record);
-    return record
-  });
-
-
-
   /*
     let out = {}
     if (!record.zip && !record.city && !record.state) {
