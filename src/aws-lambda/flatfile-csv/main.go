@@ -77,6 +77,11 @@ func getKeys(m map[string]interface{}) []string {
 }
 
 func ValidatePlant(w http.ResponseWriter, r *http.Request) {
+
+    sendErrorResponse(w, errors.New("Function not written yet"))
+    return
+    
+    /*
     body, err := ioutil.ReadAll(r.Body)
     if err != nil {
         sendErrorResponse(w, err)
@@ -104,6 +109,7 @@ func ValidatePlant(w http.ResponseWriter, r *http.Request) {
     }
     query := "SELECT " + columnsPlaceholder + "FROM plant WHERE plant_id = " + "$" + Itoa(len(keys))
     preexistingRow, err := db.QueryRow(query, keys..., plant_id)
+    */
 
     // TODO: row.scan https://kylewbanks.com/blog/query-result-to-map-in-golang
     // and compare each thingy except those that are null
