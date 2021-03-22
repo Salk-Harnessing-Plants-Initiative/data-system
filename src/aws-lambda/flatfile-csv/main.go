@@ -5,7 +5,9 @@ import (
     "log"
     "context"
     "fmt"
+    "strings"
     "os"
+    "strconv"
     "io/ioutil"
     "encoding/json"
     "net/http"
@@ -62,6 +64,51 @@ func sendErrorResponse(w http.ResponseWriter, err error) {
     w.WriteHeader(http.StatusBadRequest)
     w.Write([]byte(err.Error()))
     log.Println("Error:", err)
+}
+
+func getKeys(m map[string]interface{}) []string {
+    keys := make([]string, len(m))
+    i := 0
+    for k := range m {
+        keys[i] = k
+        i++
+    }
+    return keys
+}
+
+func ValidatePlant(w http.ResponseWriter, r *http.Request) {
+    body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+
+    var data map[string]interface{}
+    err := json.Unmarshal(body, &data)
+    if err != nil {
+        sendErrorResponse(w, err)
+        return
+    }
+
+    if plant_id, ok := data["plant_id"]; !ok {
+        sendErrorResponse(w, errors.New("plant_id was missing from row")) // TODO: reflect error to user?
+        return
+    }
+
+    keys := getKeys(data)
+    // Complicated way to basically select only the fields which were given in the input data
+    // while ensuring inputs are still sanitized per good practice
+    columnsPlaceholder := ""
+    for i, _ := range keys {
+        columnsPlaceholder += "$" + strconv.Itoa(i) + "," + " "
+    }
+    query := "SELECT " + columnsPlaceholder + "FROM plant WHERE plant_id = " + "$" + Itoa(len(keys))
+    preexistingRow, err := db.QueryRow(query, keys..., plant_id)
+
+    // TODO: row.scan https://kylewbanks.com/blog/query-result-to-map-in-golang
+    // and compare each thingy except those that are null
+    // return good or bad with user-formatted error
+
 }
 
 // adds a copy of each metadata field to each row
@@ -123,7 +170,7 @@ func GenerateSetListing(fields []string) string {
     x := ""
     for i, field := range fields {
         if i != 0 {
-            x += "    "
+            x += strings.Repeat(" ", 4)
         }
         x += fmt.Sprintf("%s = subquery.%s", field, field)
         if i != len(fields) - 1 {
