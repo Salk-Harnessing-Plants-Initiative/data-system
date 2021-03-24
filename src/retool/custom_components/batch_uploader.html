@@ -1,5 +1,8 @@
 <!--
 Based on https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+
+https://stackoverflow.com/questions/36280818/how-to-convert-file-to-base64-in-javascript
+https://docs.retool.com/docs/upload-multiple-files-through-a-gcs-s3-resource
 -->
 
 
@@ -7,6 +10,18 @@ Based on https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webki
 <ul id="listing"></ul>
 
 <script type="text/javascript">
+  function getBase64(file) {
+     var reader = new FileReader();
+     reader.readAsDataURL(file);
+     reader.onload = function () {
+       console.log(reader.result);
+     };
+     reader.onerror = function (error) {
+       console.log('Error: ', error);
+     };
+  }
+
+
   document.getElementById("filepicker").addEventListener("change", function(event) {
     let output = document.getElementById("listing");
     let files = event.target.files;
@@ -14,7 +29,9 @@ Based on https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webki
     for (let i=0; i<files.length; i++) {
       let item = document.createElement("li");
       item.innerHTML = files[i].webkitRelativePath;
-      console.log(files[i]);
+      // files[i].text().then( s => {console.log(s)});
+      // console.log(files[i].text());
+      getBase64(files[i]);
       output.appendChild(item);
     };
   }, false);
