@@ -8,12 +8,14 @@ Concept as of March 2021: https://docs.google.com/presentation/d/1EFnYIE4aLeLNuL
 # Related repos
 
 ## S3 uploader services running as clients on imager computers
-* https://github.com/Salk-Harnessing-Plants-Initiative/aws-s3-desktop-uploader: Used for uploading plate MultiScan images (.tif) to the data system
+* https://github.com/Salk-Harnessing-Plants-Initiative/plant-independent-image-uploader: Used for uploading plate MultiScan images (.tif) and normal standalone images (e.g. pot images) to the data system
 * https://github.com/Salk-Harnessing-Plants-Initiative/greenhouse-giraffe-uploader: Used for uploading top-down photos (.png) of greenhouse plants to the data system
 * https://github.com/Salk-Harnessing-Plants-Initiative/plant-cylinder-uploader: Used for uploading rotational photos of plants grown in transparent cylinders
+* https://github.com/Salk-Harnessing-Plants-Initiative/aws-s3-desktop-uploader: Deprecated; use plant-independent-image-uploader.
 
 ## Tools for researchers
 * https://github.com/Salk-Harnessing-Plants-Initiative/excel-barcode-scanner-guide: Encode `plant_id` or `container_id` into a QR/barcode label and use a barcode scanner for rapid phenotypic data entry. The resultant spreadsheet can be uploaded to the data system
+* https://github.com/Salk-Harnessing-Plants-Initiative/DSLR-camera-barcode-imaging-guide: Used in deep rooting project, for example
 * https://github.com/Salk-Harnessing-Plants-Initiative/data-system-tools: Tools for cleaning data before uploading it into the data system, and tools for querying the data system for biocomputation research projects (e.g. stitching greenhouse Giraffe images for foliage analysis)
 * https://github.com/Salk-Harnessing-Plants-Initiative/nsipptparser: Simple Python package to parse `.nsippt` files which are files that contain length annotation measurements from slice plane "Views" of North Star Imaging X-ray reconstructions. Basically you can open reconstruction files (e.g., `.nsihdr`) using North Star Imaging's analysis software tool and measure root lengths. (The equivalent of ImageJ). You can Export the root length measurements by exporting the View, and the output file type is `.nsippt`. This Python package will convert `.nsippt` to JSON for you. You will be able to extract any of the length measurements as well as a useful thumbnail of the View in base64. 
 
