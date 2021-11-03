@@ -159,7 +159,7 @@ def get_upload_device_id(s3_client, bucket, image_key):
         print("Couldn't get upload_device_id: ", e)
         return None
 
-def generate_thumbnail(image, size=(1000, 1000)):
+def generate_thumbnail(image, size=(2000, 2000)):
     buf = BytesIO()
     thumbnail = image.copy()
     thumbnail.thumbnail(size) # Makes into a thumbnail in-place
