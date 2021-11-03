@@ -1,4 +1,6 @@
 # Register plants
+**Update as of March 2021: uses Excel spreadsheets instead of CSV files**
+
 Randomly generates new nanoids for containers and plants.
 Registers said nanoids, creates CSVs for the user to create QR codes
 and associate data with their plant. Returns the S3 keys for the
