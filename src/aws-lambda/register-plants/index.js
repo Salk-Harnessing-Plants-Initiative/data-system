@@ -5,11 +5,17 @@ Russell Tran
 December 2020
 */
 
+
+// TODO: container_metadata formula as an option
+// TODO: every-other-group shading for plant_metadata as an option
+
 // For CSVs
 const moment = require('moment')
 const stringify = require('csv-stringify/lib/sync');
 const fs = require('fs');
 const node_path = require('path');
+// Excel
+const spreadsheet = require('./spreadsheet');
 // For Postgres
 const { nanoid } = require("nanoid");
 const pg = require("pg");
@@ -28,21 +34,25 @@ const s3 = new AWS.S3();
 
 exports.handler = async (event) => {
     let {container_rows, plant_rows, container_csv_rows, plant_csv_rows} = generate_rows(event);
+    let workbook_s3_key;
     try {
-        // Upload container csv for user to S3
-        const container_csv_header = ["container_id", "container_id_abbrev"];
-        container_csv_key = await upload(make_csv(container_csv_header, container_csv_rows, event.experiment_id, event.container_type));
-        // Upload plant csv for user to S3
-        // line_accession and local_id are headers for blank columns for user to fill in later
-        const plant_csv_header = ["plant_id", "container_id", "plant_id_abbrev", "containing_position", "line_accession", "local_id"];
-        plant_csv_key = await upload(make_csv(plant_csv_header, plant_csv_rows, event.experiment_id, "plant"));
         // Insert into Postgres
         await do_insert(container_rows, plant_rows);
+
+        const num_containers = parseInt(event.num_containers, 10);
+        const plants_per_container = parseInt(event.plants_per_container, 10);
+        const workbook = spreadsheet.generate_workbook(num_containers, plants_per_container, container_csv_rows, plant_csv_rows);
+
+        const experiment_id = event.experiment_id;
+        const path = `/tmp/${experiment_id}_${nanoid(4)}.xlsx`; // TODO make distinctions for additional registrations
+        await workbook.xlsx.writeFile(path);
+        workbook_s3_key = await upload(path); 
+
     } catch (err) {
         console.log(err);
         return {statusCode: 400, body: err.stack};
     }
-    return {statusCode: 200, container_csv_key: container_csv_key, plant_csv_key: plant_csv_key};
+    return {"statusCode": 200, workbook_s3_key : workbook_s3_key};
 }
 
 function generate_container_id() {
@@ -113,8 +123,6 @@ async function do_insert(container_rows, plant_rows) {
     } catch(err) {
         throw err;
     }
-
-    console.log(queryResult);
 }
 
 function make_csv (header_row, rows, experiment_id, topic) {
