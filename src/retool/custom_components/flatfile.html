@@ -55,6 +55,41 @@ window.Retool.subscribe(function(model) {
     name: JSON.stringify(model.superFields)
   });
 
+  importer.registerRecordHook(async record => {
+    let returnedEmails = await fetch('https://fake-api-call.com/emails', {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record)
+    }).then(response => response.json());
+    // assuming the POST request returns the proper data format
+    return returnedEmails;
+  });
+
+  /*
+    let out = {}
+    if (!record.zip && !record.city && !record.state) {
+      out.state = {
+        info: [
+          {
+            message: 'City and State required without Zip code',
+            level: 'error'
+          }
+        ]
+      }
+    }
+    return out
+  });
+{
+  info: [
+    {
+      message: 'City and State required without Zip code',
+      level: 'error'
+    }
+  ]
+}
+  */
+
 
   $("#portal").click(function () {
     importer
