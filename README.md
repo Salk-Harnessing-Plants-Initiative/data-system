@@ -82,4 +82,4 @@ The thing is that we use QR codes both as a way to automatically sort our images
 
 4. Upload `plant_metadata.csv` into the table `plant` using the Retool Database Editor.
 
-
+5. Update the [data migration log](https://github.com/Salk-Harnessing-Plants-Initiative/data-system/releases/) (we are using Github releases to track this, which is kind of janky but ok for now).
