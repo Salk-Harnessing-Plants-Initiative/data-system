@@ -73,6 +73,9 @@ The thing is that we use QR codes both as a way to automatically sort our images
 
 * If you are imaging entire partitions of a greenhouse or crop field, encode `section_name` as the QR code used on signs to identify the section. For instance, in the Encinitas greenhouse we use `section_name` as the QR code on big laminated signs so that when we take top-down images of the growing tables using the Greenhouse Giraffe or otherwise, the images get associated with that section. **All Greenhouse Giraffe images will only be sorted by `section_name`-based QR codes.** 
 
-
+# Manual migration of plate Excel spreadsheet to data system
+1. Manually copy `plant_metadata` and `line_accession_metadata` sheets from the `.xlsx` into 3 independent `CSV` files. E.g. `plant_metadata.csv`, `line_accession_metadata.csv`. You don't need to touch `container_metadata`.
+2. Upload `line_accession_metadata.csv` first using pgAdmin.
+3. Upload `plant_metadata` using pgAdmin.
 
 
