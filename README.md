@@ -81,10 +81,10 @@ As an admin, you may have to do this as a favor to biologists in order to get th
 
 1. Manually copy `plant_metadata` and `line_accession_metadata` sheets from the `.xlsx` into 2 independent `CSV` files. E.g. `plant_metadata.csv` and `line_accession_metadata.csv`. You don't need to touch `container_metadata`.
 
-2. Clean the data. Scrub duplicates, remove invalid columns, replace "N/A" with null, correct dates.
+2. Clean the data. Scrub duplicates, remove invalid or extraneous columns (e.g. `notes` or `plant_abbrev` columns), replace "N/A" with null, correct dates.
 
-3. Upload `line_accession_metadata.csv` into the table `line_accession` first using the Retool Database Editor.
+3. Upload `line_accession_metadata.csv` into the table `line_accession` first using the Retool Database Editor. You must use `line_accession` as the primary key.
 
-4. Upload `plant_metadata.csv` into the table `plant` using the Retool Database Editor.
+4. Upload `plant_metadata.csv` into the table `plant` using the Retool Database Editor. You must use `plant_id` as the primary key. 
 
 5. Update the [data migration log](https://github.com/Salk-Harnessing-Plants-Initiative/data-system/releases/) (we are using Github releases to track this, which is kind of janky for now but oh well).
