@@ -74,6 +74,11 @@ The thing is that we use QR codes both as a way to automatically sort our images
 * If you are imaging entire partitions of a greenhouse or crop field, encode `section_name` as the QR code used on signs to identify the section. For instance, in the Encinitas greenhouse we use `section_name` as the QR code on big laminated signs so that when we take top-down images of the growing tables using the Greenhouse Giraffe or otherwise, the images get associated with that section. **All Greenhouse Giraffe images will only be sorted by `section_name`-based QR codes.** 
 
 # Manual migration of plate Excel spreadsheet to data system
+
+<img src="./doc/retool_database_editor.png" height="500"> 
+
+As an admin, you may have to do this as a favor to biologists in order to get their spreadsheet data into the database.
+
 1. Manually copy `plant_metadata` and `line_accession_metadata` sheets from the `.xlsx` into 2 independent `CSV` files. E.g. `plant_metadata.csv` and `line_accession_metadata.csv`. You don't need to touch `container_metadata`.
 
 2. Clean the data. Scrub duplicates, remove invalid columns, replace "N/A" with null, correct dates.
@@ -82,4 +87,4 @@ The thing is that we use QR codes both as a way to automatically sort our images
 
 4. Upload `plant_metadata.csv` into the table `plant` using the Retool Database Editor.
 
-5. Update the [data migration log](https://github.com/Salk-Harnessing-Plants-Initiative/data-system/releases/) (we are using Github releases to track this, which is kind of janky but ok for now).
+5. Update the [data migration log](https://github.com/Salk-Harnessing-Plants-Initiative/data-system/releases/) (we are using Github releases to track this, which is kind of janky for now but oh well).
