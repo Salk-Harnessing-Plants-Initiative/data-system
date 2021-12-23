@@ -75,7 +75,11 @@ The thing is that we use QR codes both as a way to automatically sort our images
 
 # Manual migration of plate Excel spreadsheet to data system
 1. Manually copy `plant_metadata` and `line_accession_metadata` sheets from the `.xlsx` into 2 independent `CSV` files. E.g. `plant_metadata.csv` and `line_accession_metadata.csv`. You don't need to touch `container_metadata`.
-2. Upload `line_accession_metadata.csv` into the table `line_accession` first using the Retool Database Editor.
-3. Upload `plant_metadata.csv` into the table `plant` using the Retool Database Editor.
+
+2. Clean the data. Scrub duplicates, remove invalid columns, replace "N/A" with null, correct dates.
+
+3. Upload `line_accession_metadata.csv` into the table `line_accession` first using the Retool Database Editor.
+
+4. Upload `plant_metadata.csv` into the table `plant` using the Retool Database Editor.
 
 
