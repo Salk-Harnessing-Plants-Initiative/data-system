@@ -88,3 +88,16 @@ As an admin, you may have to do this as a favor to biologists in order to get th
 4. Upload `plant_metadata.csv` into the table `plant` using the Retool Database Editor. You must use `plant_id` as the primary key. 
 
 5. Update the [data migration log](https://github.com/Salk-Harnessing-Plants-Initiative/data-system/releases/) (we are using Github releases to track this, which is kind of janky for now but oh well).
+
+# How to print QR code labels using Brady
+1) Create a custom label in Brady
+2) Import spreadsheet
+3) Place the container_id column as QR CODE (it'll generate from the values) 
+4) Place the container_id_abbrev as TEXT
+5) Place 1_line_accession as TEXT to represent the top half
+6) Place 2_line_accession as TEXT to represent the bottom half
+7) Place the treatment column as TEXT to show the treatment
+
+Best bet is to follow the spatial arrangement that the previous labels used as an example
+
+The Retool site should have a link to a tutorial video as of January 2022
