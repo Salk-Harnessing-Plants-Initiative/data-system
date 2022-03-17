@@ -20,6 +20,11 @@ Concept as of March 2021: https://docs.google.com/presentation/d/1EFnYIE4aLeLNuL
 * https://github.com/Salk-Harnessing-Plants-Initiative/nsipptparser: Simple Python package to parse `.nsippt` files which are files that contain length annotation measurements from slice plane "Views" of North Star Imaging X-ray reconstructions. Basically you can open reconstruction files (e.g., `.nsihdr`) using North Star Imaging's analysis software tool and measure root lengths. (The equivalent of ImageJ). You can Export the root length measurements by exporting the View, and the output file type is `.nsippt`. This Python package will convert `.nsippt` to JSON for you. You will be able to extract any of the length measurements as well as a useful thumbnail of the View in base64. 
 
 # Architecture
+<img src="./doc/flow.jpeg" height="400"> 
+
+
+*(Concept of architecture, not up-to-date reflection)*  
+
 We use Postgres for our database, AWS Lambda for the backend, Retool for the frontend, and have various scripts running on client computers to upload images.
 
 
