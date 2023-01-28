@@ -78,7 +78,7 @@ The thing is that we use QR codes both as a way to automatically sort our images
 
 * If you are imaging entire partitions of a greenhouse or crop field, encode `section_name` as the QR code used on signs to identify the section. For instance, in the Encinitas greenhouse we use `section_name` as the QR code on big laminated signs so that when we take top-down images of the growing tables using the Greenhouse Giraffe or otherwise, the images get associated with that section. **All Greenhouse Giraffe images will only be sorted by `section_name`-based QR codes.** 
 
-#### (plant_id vs container_id vs section_name and Rules, rewritten by ChatGPT 01/28/2023)
+#### ("Explained: plant_id vs container_id vs section_name" and "Rules", rewritten by ChatGPT 01/28/2023)
 
 This code documentation explains the different types of QR codes used in the system and their respective uses.
 
