@@ -78,6 +78,19 @@ The thing is that we use QR codes both as a way to automatically sort our images
 
 * If you are imaging entire partitions of a greenhouse or crop field, encode `section_name` as the QR code used on signs to identify the section. For instance, in the Encinitas greenhouse we use `section_name` as the QR code on big laminated signs so that when we take top-down images of the growing tables using the Greenhouse Giraffe or otherwise, the images get associated with that section. **All Greenhouse Giraffe images will only be sorted by `section_name`-based QR codes.** 
 
+#### plant_id vs container_id vs section_name and Rules, rewritten by ChatGPT 01/28/2023
+
+This code documentation explains the different types of QR codes used in the system and their respective uses.
+
+Plant_id is a unique identifier for a single plant. It is used to identify a specific plant and is not related to a species, variety, or accession.
+Container_id is a unique identifier for the container where a plant is grown. This could be an agar plate, plastic cylinder, or pot. A container_id can have multiple plant_ids associated with it, but a plant_id can only have one container_id.
+Section_name is an identifier for a specific section of a greenhouse or outdoor crop field. It is constant and remains the same regardless of the plants in that section.
+When working with agar plates, the container_id should be encoded as the QR code on the label during label-printing. This is because agar plates often have many seedlings growing in them and the images will be sorted by container_id-based QR codes. When working with plastic cylinders or normal plant pots, the plant_id should be encoded as the QR code on the label, as someone will likely be using a handheld barcode scanner to scan each plant when doing physical phenotypic measurements and manual data entry. However, all cylinder images, 3D scan images, and X-ray images will be capable of being sorted by both plant_id and container_id-based QR codes.
+
+When imaging entire partitions of a greenhouse or crop field, the section_name should be encoded as the QR code used on signs to identify the section. This is used when taking top-down images of the growing tables using a device such as the Greenhouse Giraffe. All Greenhouse Giraffe images will only be sorted by section_name-based QR codes.
+
+As a developer working on this data system, it is important to know that all images with the exception of Greenhouse Giraffe images should ultimately get identified by container_id in order to make querying easy and unified later. If needed, plant_ids should be transformed to container_id on the backend.
+
 # Manual migration of plate Excel spreadsheet to data system
 
 <img src="./doc/retool_database_editor.png" height="500"> 
