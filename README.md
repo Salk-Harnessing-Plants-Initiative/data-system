@@ -1,9 +1,11 @@
 # Salk HPI Data System
 The main Salk HPI Data System for tracking plants and their phenotypic data in the lab, greenhouse, and field. Integrates with QR code tracking. Makes querying past experiments (+ images, etc.) and environmental data easier.
 
-We don't currently have a wiki, so the best context for code is this readme and the readmes that are closest to each bit of code. However, there are some generally useful notes you can find here: https://www.notion.so/Salk-Harnessing-Plants-Initiative-Software-Engineering-Wiki-8b4c2524c41b4a4dae847a4b61cde92a
+* We don't currently have a wiki, so the best context for code is this readme and the readmes that are closest to each bit of code. However, there are some generally useful notes you can find here: https://www.notion.so/Salk-Harnessing-Plants-Initiative-Software-Engineering-Wiki-8b4c2524c41b4a4dae847a4b61cde92a
 
-Concept as of March 2021: https://docs.google.com/presentation/d/1EFnYIE4aLeLNuLu7ud0ikeX_zSn1_6kez7k2p-ynouQ/edit?usp=sharing
+* Concept as of March 2021: https://docs.google.com/presentation/d/1EFnYIE4aLeLNuLu7ud0ikeX_zSn1_6kez7k2p-ynouQ/edit?usp=sharing
+
+* **Technical presentation May 2024: https://docs.google.com/presentation/d/19fMDeZ8MUqn1RcpDJVklXc5vGzb4T6mMePMxaf9wUxY/edit?usp=sharing**
 
 # Related repos
 
