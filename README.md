@@ -5,7 +5,7 @@ The main Salk HPI Data System for tracking plants and their phenotypic data in t
 
 * Concept as of March 2021: https://docs.google.com/presentation/d/1EFnYIE4aLeLNuLu7ud0ikeX_zSn1_6kez7k2p-ynouQ/edit?usp=sharing
 
-* **Technical presentation May 2024: https://docs.google.com/presentation/d/19fMDeZ8MUqn1RcpDJVklXc5vGzb4T6mMePMxaf9wUxY/edit?usp=sharing**
+* **Technical presentation & retrospective May 2024: https://docs.google.com/presentation/d/19fMDeZ8MUqn1RcpDJVklXc5vGzb4T6mMePMxaf9wUxY/edit?usp=sharing**
 
 # Related repos
 
